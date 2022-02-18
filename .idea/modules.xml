@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/abii_backend.iml" filepath="$PROJECT_DIR$/.idea/abii_backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../abii-backend/.idea/abii-backend.iml" filepath="$PROJECT_DIR$/../abii-backend/.idea/abii-backend.iml" />
     </modules>
   </component>
 </project>
