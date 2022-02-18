@@ -14,4 +14,6 @@ router.patch("/:productId", passport.authenticate("jwt"), controller.update);
 
 router.delete("/:productId", passport.authenticate("jwt"), controller.remove);
 
+router.patch("/:productId/available", passport.authenticate("jwt"), controller.toggleAvailability);
+
 export default router;

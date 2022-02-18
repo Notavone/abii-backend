@@ -4,5 +4,6 @@ export interface Product {
     type: ProductType
     name: string,
     price: number,
-    discount: number
+    discount: number,
+    available: boolean
 }

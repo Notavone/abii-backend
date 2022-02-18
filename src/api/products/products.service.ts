@@ -21,6 +21,11 @@ const schema = new Schema<Product>({
         type: Schema.Types.Number,
         required: false,
         default: 0
+    },
+    available: {
+        type: Schema.Types.Boolean,
+        required: false,
+        default: true
     }
 });
 
