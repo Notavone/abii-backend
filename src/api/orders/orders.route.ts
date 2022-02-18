@@ -5,6 +5,10 @@ const router = Router();
 
 router.get("/", controller.getAll);
 
-router.post("/:orderId", controller.get);
+router.post("/", controller.create);
+
+router.get("/:orderId", controller.get);
+
+router.delete("/:orderId", controller.remove);
 
 export default router;

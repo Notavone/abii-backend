@@ -15,8 +15,6 @@ router.patch("/:clientId/status", controller.updateStatus);
 
 router.patch("/:clientId/balance", controller.updateBalance);
 
-router.post("/:clientId/orders", controller.createOrder);
-
 router.delete("/:clientId", controller.remove);
 
 export default router;
