@@ -20,6 +20,11 @@ const schema = new Schema<Order>({
         type: Schema.Types.String,
         ref: "Client",
         required: true
+    },
+    date: {
+        type: Schema.Types.Number,
+        required: false,
+        default: Date.now()
     }
 });
 
