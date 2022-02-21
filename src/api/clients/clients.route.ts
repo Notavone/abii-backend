@@ -1,13 +1,14 @@
 import Router from "express";
+import * as apicache from "apicache";
 import * as controller from "./clients.controller";
 
 const router = Router();
 
-router.get("/", controller.getAll);
+router.get("/", apicache.middleware("1 minute"), controller.getAll);
 
 router.post("/", controller.create);
 
-router.get("/:clientId", controller.get);
+router.get("/:clientId", apicache.middleware("1 minute"), controller.get);
 
 router.patch("/:clientId", controller.update);
 

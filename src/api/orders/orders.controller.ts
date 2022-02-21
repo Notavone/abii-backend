@@ -9,8 +9,9 @@ export async function getAll(req: Request, res: Response, next: NextFunction) {
         const conditions = Object.keys(query)
             .reduce((result, key) => {
                 if (query[key]) {
+                    let parsed = JSON.parse(String(query[key]));
                     // @ts-ignore
-                    result[key] = query[key];
+                    if(parsed) result[key] = parsed;
                 }
                 return result;
             }, {});

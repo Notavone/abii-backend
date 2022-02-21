@@ -1,6 +1,4 @@
 import express from "express";
-import * as http from "http";
-import * as https from "https";
 import {config} from "dotenv";
 import {connect} from "mongoose";
 import morgan from "morgan";
@@ -14,8 +12,7 @@ import tokenRouter from "./api/token/token.route";
 
 config();
 
-const APP_HTTP = process.env.APP_HTTP ?? 3000;
-const APP_HTTPS = process.env.APP_HTTPS ?? 8080;
+const APP_PORT = process.env.APP_PORT ?? 9000;
 const MONGODB = process.env.MONGODB ?? "";
 
 connect(MONGODB).catch((e) => {
@@ -24,15 +21,14 @@ connect(MONGODB).catch((e) => {
 });
 
 const app = express();
-const HTTPServer = http.createServer(app);
-const TLSServer = https.createServer(app);
 
-HTTPServer.listen(APP_HTTP, () => console.log("HTTP listening on port " + APP_HTTP));
-TLSServer.listen(APP_HTTPS, () => console.log("HTTPS listening on port " + APP_HTTPS));
+app.listen(APP_PORT, () => console.log("Listening on port " + APP_PORT));
 
 app.use(
     morgan("dev"),
-    cors(),
+    cors({
+        origin: "*",
+    }),
     express.json(),
     express.urlencoded({extended: true}),
     passport.initialize()

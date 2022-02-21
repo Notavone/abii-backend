@@ -17,10 +17,9 @@ const schema = new Schema<Product>({
         type: Schema.Types.Number,
         required: true
     },
-    discount: {
+    price_red: {
         type: Schema.Types.Number,
-        required: false,
-        default: 0
+        required: true
     },
     available: {
         type: Schema.Types.Boolean,

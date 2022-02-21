@@ -22,8 +22,8 @@ export async function get(req: Request, res: Response, next: NextFunction) {
 
 export async function create(req: Request, res: Response, next: NextFunction) {
     try {
-        let {type, name, price, discount} = req.body;
-        let product = await Product.create({type, name, price, discount});
+        let {type, name, price, price_red} = req.body;
+        let product = await Product.create({type, name, price, price_red});
         res.status(201).json({data: product});
     } catch (e) {
         next(e);
@@ -32,9 +32,9 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 
 export async function update(req: Request, res: Response, next: NextFunction) {
     try {
-        let {type, name, price, discount, available} = req.body;
+        let {type, name, price, price_red, available} = req.body;
         let product = await Product.findByIdAndUpdate(req.params.productId, {
-            type, name, price, discount, available
+            type, name, price, price_red, available
         }, {new: true});
         if (!product) throw "Product not found.";
         res.json({data: product});
