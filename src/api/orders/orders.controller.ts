@@ -47,7 +47,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
         if (!lines.length || lines.map((l: any) => l.product).includes(undefined)) throw "Bad request.";
         let isSubscribed = Date.now() < foundClients.subscriptionEnd;
 
-        let total = Math.abs(lines.reduce((acc: number, cur: any) => acc + (isSubscribed ? cur.product.price - cur.product.price * cur.product.discount / 100 : cur.product.price) * cur.qty, 0)) * -1;
+        let total = Math.abs(lines.reduce((acc: number, cur: any) => acc + (isSubscribed ? cur.product.price_red : cur.product.price) * cur.qty, 0)) * -1;
 
         let order = await Order.create({
             lines: lines.map((l: any) => {
