@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@types/cors": "^2.8.12",
-    "apicache": "^1.6.3",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
