@@ -17,7 +17,7 @@ export async function request(req: Request, res: Response, next: NextFunction) {
         if (!good) throw "INCORRECT_PASSWORD";
 
         sign(req.body, secret, {
-            expiresIn: "1 hour"
+            expiresIn: "12 hour"
         }, (err: Error | null, token: string | undefined) => {
             if (err) next(err);
             return res.json({token});
