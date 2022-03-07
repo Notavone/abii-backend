@@ -54,7 +54,8 @@ export async function create(req: Request, res: Response, next: NextFunction) {
                 return {...l, product: l.product._id};
             }),
             total,
-            client: foundClients._id
+            client: foundClients._id,
+            date: Date.now()
         });
 
         foundClients = await Client.findByIdAndUpdate(foundClients._id, {
