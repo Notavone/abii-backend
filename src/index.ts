@@ -14,6 +14,7 @@ config();
 
 const APP_PORT = process.env.APP_PORT ?? 9000;
 const MONGODB = process.env.MONGODB ?? "";
+let JWT_SECRET = process.env.JWT_SECRET ?? "";
 
 connect(MONGODB).catch((e) => {
     console.error(e);
@@ -36,7 +37,7 @@ app.use(
 
 passport.use(new jwt.Strategy({
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET,
+    secretOrKey: JWT_SECRET,
     algorithms: ["HS256"]
 }, (payload, done) => {
     User.findOne({email: payload.email})

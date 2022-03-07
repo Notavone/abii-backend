@@ -8,7 +8,7 @@ const schema = new Schema<Order>({
                 type: Schema.Types.ObjectId,
                 ref: "Product"
             },
-            qty: Number
+            qty: Schema.Types.Number
         }],
         required: true
     },
@@ -23,8 +23,7 @@ const schema = new Schema<Order>({
     },
     date: {
         type: Schema.Types.Number,
-        required: false,
-        default: Date.now()
+        required: true
     }
 });
 
