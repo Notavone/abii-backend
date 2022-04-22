@@ -1,5 +1,5 @@
 import {model, Schema} from "mongoose";
-import {Client} from "./shared/client";
+import {Client} from "./client";
 
 const schema = new Schema<Client>({
     name: {

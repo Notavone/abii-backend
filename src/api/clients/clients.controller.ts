@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import Client from "./clients.service";
-import {SubscriptionStatus} from "./shared/subscription-status";
+import {SubscriptionStatus} from "./subscription-status";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
     try {

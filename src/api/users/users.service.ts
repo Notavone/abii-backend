@@ -1,5 +1,5 @@
 import {model, Schema} from "mongoose";
-import {User} from "./shared/user";
+import {User} from "./user";
 
 const schema = new Schema<User>({
     email: {

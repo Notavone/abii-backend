@@ -1,6 +1,6 @@
 import {model, Schema} from "mongoose";
-import {Product} from "./shared/product";
-import {ProductType} from "./shared/product-type";
+import {Product} from "./product";
+import {ProductType} from "./product-type";
 
 const schema = new Schema<Product>({
     type: {

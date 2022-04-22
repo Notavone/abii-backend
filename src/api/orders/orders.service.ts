@@ -1,5 +1,5 @@
 import {model, Schema} from "mongoose";
-import {Order} from "./shared/order";
+import {Order} from "./order";
 
 const schema = new Schema<Order>({
     lines: {
