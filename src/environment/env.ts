@@ -1,0 +1,17 @@
+export default () => ({
+  PORT: process.env.PORT || 3000,
+  DB_HOST: "localhost",
+  DB_PORT: 3306,
+  DB_USERNAME: "root",
+  DB_PASSWORD: "password",
+  DB_DATABASE: "abii",
+  JWT_SECRET: "secret",
+  JWT_EXPIRES_IN: "1h",
+  JWT_COOKIE_MAX_AGE: 3600,
+  MAIL_HOST: "smtp.ethereal.com",
+  MAIL_PORT: 587,
+  MAIL_USERNAME: "lelah.abbott86@ethereal.email",
+  MAIL_PASSWORD: "TAQzCFPv3CvskSqJJH",
+  MAIL_FROM: `"Lelah" <lelah.abbott86@ethereal.email>`,
+  FRONT_URL: "912e011-01.iut-bm.univ-fcomte.fr",
+});
