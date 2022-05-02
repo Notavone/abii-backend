@@ -28,7 +28,7 @@ export class Order {
     })
     updatedAt: Date;
 
-    @ManyToOne(() => Client, {eager: true, cascade: true})
+    @ManyToOne(() => Client, {eager: true, cascade: true, onDelete: "SET NULL"})
     @ApiProperty({
         description: "The client of the order",
         example: 1,
