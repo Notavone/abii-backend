@@ -1,10 +1,9 @@
-import {NestFactory} from "@nestjs/core";
+import {NestFactory, Reflector} from "@nestjs/core";
 import {AppModule} from "./app.module";
 import {ConfigService} from "@nestjs/config";
-import {ValidationPipe} from "@nestjs/common";
+import {ClassSerializerInterceptor, ValidationPipe} from "@nestjs/common";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import {name, version} from "../package.json";
-import {TransformInterceptor} from "./transform.interceptor";
 import * as cookieParser from "cookie-parser";
 import {EntityNotFoundFilter} from "./filters/entity-not-found.filter";
 import {QueryFailedErrorFilter} from "./filters/query-failed-error.filter";
@@ -27,7 +26,7 @@ async function bootstrap() {
 
     app.useGlobalInterceptors(
         new RequestInterceptor(),
-        new TransformInterceptor()
+        new ClassSerializerInterceptor(app.get(Reflector))
     );
 
     app.useGlobalFilters(
