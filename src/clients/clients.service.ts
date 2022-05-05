@@ -24,16 +24,17 @@ export class ClientsService {
     if (query.clientId) {
       queryBuilder.where("client.clientId = :clientId", { clientId: query.clientId });
     }
+    queryBuilder.leftJoinAndSelect("client.user", "user");
 
     return queryBuilder.getMany();
   }
 
   findOne(id: number) {
-    return this.clientsRepository.findOneOrFail(id);
+    return this.clientsRepository.findOneOrFail(id, {relations: ["user"]});
   }
 
   async update(id: number, updateClientDto: UpdateClientDto) {
-    let client = await this.clientsRepository.findOneOrFail(id);
+    let client = await this.clientsRepository.findOneOrFail(id, {relations: ["user"]});
     client = this.clientsRepository.merge(client, updateClientDto);
     return this.clientsRepository.save(client);
   }

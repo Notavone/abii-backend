@@ -1,75 +1,76 @@
-import { Injectable } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
-import { User } from "./entities/user.entity";
-import { Connection, MoreThanOrEqual, Repository } from "typeorm";
-import { Cron, CronExpression } from "@nestjs/schedule";
-import { MailService } from "../mail/mail.service";
-import { ConfirmUserDto } from "./dto/confirm-user.dto";
+import {Injectable} from "@nestjs/common";
+import {CreateUserDto} from "./dto/create-user.dto";
+import {UpdateUserDto} from "./dto/update-user.dto";
+import {InjectConnection, InjectRepository} from "@nestjs/typeorm";
+import {User} from "./entities/user.entity";
+import {Connection, MoreThanOrEqual, Repository} from "typeorm";
+import {Cron, CronExpression} from "@nestjs/schedule";
+import {MailService} from "../mail/mail.service";
+import {ConfirmUserDto} from "./dto/confirm-user.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectConnection() private readonly connection: Connection,
-    private readonly mailService: MailService,
-  ) {
-  }
-
-  async create(createUserDto: CreateUserDto) {
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const user = queryRunner.manager.create(User, createUserDto);
-      await queryRunner.manager.save(user);
-      await this.mailService.sendConfirmation(user);
-      await queryRunner.commitTransaction();
-      return user;
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
+    constructor(
+        @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectConnection() private readonly connection: Connection,
+        private readonly mailService: MailService,
+    ) {
     }
-  }
 
-  confirm(body: ConfirmUserDto) {
-    return this.connection.transaction<User>(async (manager) => {
-      const user = await manager.findOne(User, { where: { ...body } });
-      manager.merge(User, user, { activated: true });
-      return manager.save(user);
-    });
-  }
+    async create(createUserDto: CreateUserDto) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-  findAll() {
-    return this.userRepository.find();
-  }
+        try {
+            const user = queryRunner.manager.create(User, createUserDto);
+            await queryRunner.manager.save(user);
+            await this.mailService.sendConfirmation(user);
+            await queryRunner.commitTransaction();
+            return user;
+        } catch (e) {
+            await queryRunner.rollbackTransaction();
+        } finally {
+            await queryRunner.release();
+        }
+    }
 
-  findOne(id: number) {
-    return this.userRepository.findOneOrFail(id);
-  }
+    confirm(body: ConfirmUserDto) {
+        return this.connection.transaction<User>(async (manager) => {
+            const user = await manager.findOne(User, {where: {...body}, relations: ["client"]});
+            manager.merge(User, user, {activated: true});
+            return manager.save(user);
+        });
+    }
 
-  async update(user: User, updateUserDto: UpdateUserDto) {
-    return this.connection.transaction<User>(async (manager) => {
-      const merged = manager.merge(User, user, updateUserDto);
-      return manager.save(merged);
-    });
-  }
+    findAll() {
+        return this.userRepository.find({relations: ["client"]});
+    }
 
-  async remove(user: User) {
-    return this.userRepository.remove(user);
-  }
+    findOne(id: number) {
+        return this.userRepository.findOneOrFail(id, {relations: ["client"]});
+    }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  deleteInactive() {
-    this.userRepository.find({
-      where: {
-        activated: false,
-        createdAt: MoreThanOrEqual(new Date(Date.now() - 7200000)),
-      },
-    })
-      .then((users) => users.forEach((user) => this.userRepository.remove(user)));
-  }
+    async update(user: User, updateUserDto: UpdateUserDto) {
+        return this.connection.transaction<User>(async (manager) => {
+            const merged = manager.merge(User, user, {...updateUserDto});
+            return manager.save(merged);
+        });
+    }
+
+    async remove(user: User) {
+        return this.userRepository.remove(user);
+    }
+
+    @Cron(CronExpression.EVERY_10_MINUTES)
+    deleteInactive() {
+        this.userRepository.find({
+            where: {
+                activated: false,
+                createdAt: MoreThanOrEqual(new Date(Date.now() - 7200000)),
+            },
+            relations: ["client"],
+        })
+            .then((users) => users.forEach((user) => this.userRepository.remove(user)));
+    }
 }
