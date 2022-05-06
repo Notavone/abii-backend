@@ -53,7 +53,8 @@ export class UsersService {
 
     async update(user: User, updateUserDto: UpdateUserDto) {
         return this.connection.transaction<User>(async (manager) => {
-            const merged = manager.merge(User, user, {...updateUserDto});
+            const merged = manager.merge(User, user, updateUserDto);
+            if(!updateUserDto.client) user.client = null;
             return manager.save(merged);
         });
     }

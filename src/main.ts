@@ -22,6 +22,8 @@ async function bootstrap() {
         transform: true,
         forbidNonWhitelisted: true,
         forbidUnknownValues: true,
+        skipUndefinedProperties: true,
+        skipNullProperties: false,
     }));
 
     app.useGlobalInterceptors(

@@ -62,7 +62,8 @@ export class OrdersService {
             const qb = this.orderRepository.createQueryBuilder("order")
                 .leftJoinAndSelect("order.client", "client")
                 .leftJoinAndSelect("order.orderLines", "orderLines")
-                .leftJoinAndSelect("orderLines.product", "product");
+                .leftJoinAndSelect("orderLines.product", "product")
+                .leftJoinAndSelect("client.user", "user");
 
             if (query.fromTimestamp) {
                 qb.andWhere("order.createdAt >= :startDate", {startDate: new Date(+query.fromTimestamp)});
