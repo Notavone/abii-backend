@@ -24,8 +24,9 @@ export class UsersController {
   }
 
   @Get("me")
-  currentlyLoggedIn(@Req() request): User {
-    return request.user;
+  currentlyLoggedIn(@Req() request) {
+    // todo améliorer cet appel pour que le left join soit fait avant et évite un appel non voulu au findone
+    return this.usersService.findOne(request.user.id);
   }
 
   @Public()
