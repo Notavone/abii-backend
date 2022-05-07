@@ -26,9 +26,10 @@ export class OrderLine {
   })
   order: Order;
 
-  @ApiHideProperty()
   @RelationId((orderLine: OrderLine) => orderLine.order)
-  @Exclude()
+  @ApiProperty({
+    description: "The id of the order that this order line belongs to",
+  })
   orderId: number;
 
   @ManyToOne(() => Product, { eager: true, cascade: true, onDelete: "SET NULL" })
@@ -37,8 +38,9 @@ export class OrderLine {
   })
   product?: Product;
 
-  @ApiHideProperty()
   @RelationId((orderLine: OrderLine) => orderLine.product)
-  @Exclude()
+  @ApiProperty({
+    description: "The id of the product that is ordered",
+  })
   productId?: number;
 }
