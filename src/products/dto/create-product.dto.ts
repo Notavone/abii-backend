@@ -43,4 +43,11 @@ export class CreateProductDto {
     default: true,
   })
   readonly available?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: "Base64 encoded image",
+  })
+  readonly image?: string;
 }
