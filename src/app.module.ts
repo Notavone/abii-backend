@@ -33,6 +33,7 @@ import {ServeStaticModule} from "@nestjs/serve-static";
                 entities: [__dirname + "/**/*.entity{.ts,.js}"],
                 subscribers: [__dirname + "/**/*.subscriber{.ts,.js}"],
                 synchronize: configService.get("DB_SYNCHRONIZE"),
+                logging: configService.get("DB_LOGGING"),
             }),
         }),
         AuthModule,

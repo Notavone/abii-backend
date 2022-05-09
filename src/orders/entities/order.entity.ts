@@ -28,18 +28,18 @@ export class Order {
     })
     updatedAt: Date;
 
-    @ManyToOne(() => Client, {eager: true, cascade: true, onDelete: "SET NULL"})
+    @ManyToOne(() => Client, {cascade: true, onDelete: "SET NULL"})
     @ApiProperty({
         description: "The client of the order",
         example: 1,
     })
-    client: Client;
+    client?: Client;
 
     @Exclude()
     @RelationId((order: Order) => order.client)
-    clientId: number;
+    clientId?: number;
 
-    @OneToMany(() => OrderLine, orderLine => orderLine.order, {eager: true, cascade: true})
+    @OneToMany(() => OrderLine, orderLine => orderLine.order, {cascade: true})
     @ApiProperty({
         description: "The order lines of the order",
         example: [1, 2],
@@ -60,7 +60,7 @@ export class Order {
     })
     refunded: boolean;
 
-    @ManyToOne(() => User, {eager: true, nullable: true, cascade: true})
+    @ManyToOne(() => User, {nullable: true, cascade: true, onDelete: "SET NULL"})
     @ApiProperty({
         description: "The user that validated the order",
         example: 1,
@@ -82,8 +82,13 @@ export class Order {
     @BeforeInsert()
     calculateTotal() {
         this.total = this.orderLines.reduce((total, orderLine) => {
-            let sub = this.client.subscribedUntil > new Date(Date.now());
-            let price = sub ? orderLine.product.price_red : orderLine.product.price;
+            let client = this.client;
+            let sub = client ? client.subscribedUntil > new Date(Date.now()) : false;
+
+            let product = orderLine.product;
+            if (!product) return total;
+
+            let price = sub ? product.price_red : product.price;
             return total + price * orderLine.quantity;
         }, 0);
     }

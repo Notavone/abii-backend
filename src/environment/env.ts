@@ -14,4 +14,5 @@ export default () => ({
   MAIL_PASSWORD: "TAQzCFPv3CvskSqJJH",
   MAIL_FROM: `"Lelah" <lelah.abbott86@ethereal.email>`,
   FRONT_URL: "912e011-01.iut-bm.univ-fcomte.fr",
+  DB_LOGGING: false,
 });

@@ -7,19 +7,14 @@ import {QueryOrderDto} from "./dto/query-order.dto";
 import {OrderLine} from "./entities/order-line.entity";
 import {UpdateOrderDto} from "./dto/update-order.dto";
 import {Client} from "../clients/entities/client.entity";
-import {ClientsService} from "../clients/clients.service";
-import {ProductsService} from "../products/products.service";
-import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
+import {Product} from "../products/entities/product.entity";
 
 @Injectable()
 export class OrdersService {
     constructor(
         @InjectConnection() private readonly connection: Connection,
         @InjectRepository(Order) private readonly orderRepository: Repository<Order>,
-        private readonly clientsService: ClientsService,
-        private readonly productsService: ProductsService,
-        private readonly usersService: UsersService,
     ) {
     }
 
@@ -29,20 +24,19 @@ export class OrdersService {
         await queryRunner.startTransaction()
 
         try {
-            const client = await this.clientsService.findOne(createOrderDto.clientId)
+            const client = await queryRunner.manager.findOneOrFail(Client, createOrderDto.clientId);
             let order = queryRunner.manager.create(Order, {
                 client,
                 orderLines: []
             });
 
             for (const orderLine of createOrderDto.orderLines) {
-                const product = await this.productsService.findOne(orderLine.productId)
+                const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
                 let line = queryRunner.manager.create(OrderLine, {
                     product,
                     quantity: orderLine.quantity
                 });
                 order.orderLines.push(line);
-                await queryRunner.manager.save(OrderLine, line);
             }
 
             order = await queryRunner.manager.save(order);
@@ -100,7 +94,7 @@ export class OrdersService {
     }
 
     findOne(id: number) {
-        return this.orderRepository.findOneOrFail(id);
+        return this.orderRepository.findOneOrFail(id, {relations: ["orderLines", "client", "orderLines.product"]});
     }
 
     async update(order: Order, updateOrderDto: UpdateOrderDto) {
@@ -113,7 +107,7 @@ export class OrdersService {
         try {
             order.orderLines = [];
             for (const orderLine of updateOrderDto.orderLines) {
-                const product = await this.productsService.findOne(orderLine.productId)
+                const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
                 let line = queryRunner.manager.create(OrderLine, {
                     product,
                     quantity: orderLine.quantity
@@ -148,9 +142,8 @@ export class OrdersService {
             });
             await queryRunner.manager.save(Order, order);
 
-            const client = await this.clientsService.findOne(order.clientId);
-            client.balance -= order.total;
-            await queryRunner.manager.save(Client, client);
+            order.client.balance -= +order.total;
+            await queryRunner.manager.save(Client, order.client);
 
             await queryRunner.commitTransaction();
             return order;
@@ -173,10 +166,10 @@ export class OrdersService {
         try {
             order.refunded = true;
             order.seller = seller;
-            await queryRunner.manager.save(Order, order);
+            order.client.balance += +order.total;
 
-            order.client.balance += order.total;
             await queryRunner.manager.save(Client, order.client);
+            await queryRunner.manager.save(Order, order);
 
             await queryRunner.commitTransaction();
             return order;
