@@ -49,6 +49,12 @@ export class Product {
   })
   type: ProductType;
 
+  @Column("text", {nullable: true})
+  @ApiProperty({
+    description: "Base64 encoded image",
+  })
+  image?: string
+
   @CreateDateColumn()
   @ApiProperty({
     description: "Product creation date",
