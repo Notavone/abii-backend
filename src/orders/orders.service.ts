@@ -9,6 +9,7 @@ import {UpdateOrderDto} from "./dto/update-order.dto";
 import {Client} from "../clients/entities/client.entity";
 import {User} from "../users/entities/user.entity";
 import {Product} from "../products/entities/product.entity";
+import {ProductsService} from "../products/products.service";
 
 @Injectable()
 export class OrdersService {
@@ -44,8 +45,7 @@ export class OrdersService {
             return order;
         } catch (e) {
             await queryRunner.rollbackTransaction();
-            console.error(e);
-            throw new BadRequestException(e);
+            throw e;
         } finally {
             await queryRunner.release()
         }
@@ -122,7 +122,7 @@ export class OrdersService {
         } catch (e) {
             await queryRunner.rollbackTransaction();
             console.error(e);
-            throw new BadRequestException(e);
+            throw e;
         } finally {
             await queryRunner.release()
         }
@@ -136,21 +136,21 @@ export class OrdersService {
         await queryRunner.startTransaction()
 
         try {
-            queryRunner.manager.merge(Order, order, {
-                editable: false,
-                seller,
-            });
-            await queryRunner.manager.save(Order, order);
+            for (const orderLine of order.orderLines) {
+                const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
+                orderLine.product = await ProductsService.updateStock(queryRunner, product, product.stock - orderLine.quantity, seller);
+            }
 
+            order.editable = false;
+            order.seller = seller;
             order.client.balance -= +order.total;
-            await queryRunner.manager.save(Client, order.client);
+            await queryRunner.manager.save(Order, order);
 
             await queryRunner.commitTransaction();
             return order;
         } catch (e) {
             await queryRunner.rollbackTransaction();
-            console.error(e);
-            throw new BadRequestException(e);
+            throw e;
         } finally {
             await queryRunner.release()
         }
@@ -175,8 +175,7 @@ export class OrdersService {
             return order;
         } catch (e) {
             await queryRunner.rollbackTransaction();
-            console.error(e);
-            throw new BadRequestException(e);
+            throw e;
         } finally {
             await queryRunner.release()
         }
