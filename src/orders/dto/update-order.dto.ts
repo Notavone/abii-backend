@@ -1,6 +1,6 @@
 import {PartialType, PickType} from "@nestjs/swagger";
 import {CreateOrderDto} from "./create-order.dto";
 
-export class UpdateOrderDto extends PartialType(PickType(CreateOrderDto, ["orderLines"])) {
-    
+export class UpdateOrderDto extends PartialType(PickType(CreateOrderDto, ["orderLines"] as const)) {
+
 }

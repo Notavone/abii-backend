@@ -7,6 +7,9 @@ import {Connection, MoreThanOrEqual, Repository} from "typeorm";
 import {Cron, CronExpression} from "@nestjs/schedule";
 import {MailService} from "../mail/mail.service";
 import {ConfirmUserDto} from "./dto/confirm-user.dto";
+import {InitUserPasswordResetDto} from "./dto/init-user-password-reset.dto";
+import {FinishUserPasswordResetDto} from "./dto/finish-user-password-reset.dto";
+import {v4} from "uuid";
 
 @Injectable()
 export class UsersService {
@@ -43,6 +46,26 @@ export class UsersService {
         });
     }
 
+    initReset(body: InitUserPasswordResetDto) {
+        return this.connection.transaction<User>(async (manager) => {
+            let user = await manager.findOne(User, {where: {...body}});
+            manager.merge(User, user, {resetKey: v4()});
+            user = await manager.save(user);
+            await this.mailService.sendInitUserPasswordReset(user);
+            return user;
+        });
+    }
+
+    finishReset(body: FinishUserPasswordResetDto) {
+        return this.connection.transaction<User>(async (manager) => {
+            let user = await manager.findOne(User, {where: {resetKey: body.resetKey}});
+            manager.merge(User, user, {resetKey: null, password: body.password});
+            user = await manager.save(user);
+            await this.mailService.sendFinishUserPasswordReset(user);
+            return user;
+        });
+    }
+
     findAll() {
         return this.userRepository.find({relations: ["client"]});
     }
@@ -54,7 +77,7 @@ export class UsersService {
     async update(user: User, updateUserDto: UpdateUserDto) {
         return this.connection.transaction<User>(async (manager) => {
             const merged = manager.merge(User, user, updateUserDto);
-            if(!updateUserDto.client) user.client = null;
+            if (!updateUserDto.client) user.client = null;
             return manager.save(merged);
         });
     }

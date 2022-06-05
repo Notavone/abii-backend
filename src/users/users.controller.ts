@@ -1,17 +1,18 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { JwtGuard } from "../auth/jwt/jwt.guard";
-import { User } from "./entities/user.entity";
-import { ConfirmUserDto } from "./dto/confirm-user.dto";
-import { Public } from "../auth/jwt/public.decorator";
-import { PoliciesGuard } from "../auth/policies/policies.guard";
-import { Permissions } from "../auth/policies/policies.decorator";
-import { Action } from "../auth/policies/action";
-import { AppAbility } from "../auth/policies/casl-ability.factory";
-import { UserAbility } from "../auth/policies/user-ability.decorator";
+import {Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards} from "@nestjs/common";
+import {UsersService} from "./users.service";
+import {UpdateUserDto} from "./dto/update-user.dto";
+import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {CreateUserDto} from "./dto/create-user.dto";
+import {JwtGuard} from "../auth/jwt/jwt.guard";
+import {User} from "./entities/user.entity";
+import {ConfirmUserDto} from "./dto/confirm-user.dto";
+import {Public} from "../auth/jwt/public.decorator";
+import {PoliciesGuard} from "../auth/policies/policies.guard";
+import {Permissions} from "../auth/policies/policies.decorator";
+import {Action} from "../auth/policies/action";
+import {AppAbility} from "../auth/policies/casl-ability.factory";
+import {UserAbility} from "../auth/policies/user-ability.decorator";
+import {InitUserPasswordResetDto} from "./dto/init-user-password-reset.dto";
 
 @ApiBearerAuth()
 @ApiTags("users")
@@ -34,6 +35,18 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async confirm(@Body() body: ConfirmUserDto) {
     return this.usersService.confirm(body);
+  }
+
+  @Public()
+  @Post("reset")
+  async initReset(@Body() body: InitUserPasswordResetDto) {
+    return this.usersService.initReset(body);
+  }
+
+  @Public()
+  @Put("reset")
+  async finishReset(@Body() body: any) {
+    return this.usersService.finishReset(body);
   }
 
   @Public()

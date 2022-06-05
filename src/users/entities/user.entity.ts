@@ -4,6 +4,7 @@ import {Authority} from "../../auth/policies/authority";
 import {ApiHideProperty, ApiProperty, ApiPropertyOptional} from "@nestjs/swagger";
 import {hash} from "bcrypt";
 import {Client} from "../../clients/entities/client.entity";
+import {NIL} from "uuid";
 
 @Entity()
 export class User {
@@ -37,6 +38,11 @@ export class User {
     @Column()
     @ApiHideProperty()
     activationKey: string;
+
+    @Exclude()
+    @Column({nullable: true})
+    @ApiHideProperty()
+    resetKey: string;
 
     @Column({default: false})
     @ApiProperty({
