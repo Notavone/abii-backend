@@ -6,8 +6,9 @@ import { Order } from "../../orders/entities/order.entity";
 import { Action } from "./action";
 import { Authority } from "./authority";
 import { Product } from "../../products/entities/product.entity";
+import { Ean } from "../../ean/entities/ean.entity";
 
-type Subjects = InferSubjects<typeof Client | typeof User | typeof Order | typeof Product | "all">
+type Subjects = InferSubjects<typeof Client | typeof User | typeof Order | typeof Product | typeof Ean | "all">
 
 export type AppAbility = Ability<[Action, Subjects]>;
 
@@ -29,6 +30,8 @@ export class CaslAbilityFactory {
 
       can(Action.READ, Client);
       can(Action.UPDATE, Client);
+
+      can(Action.MANAGE, Ean);
     }
 
     can(Action.READ, User, {id: user.id});
