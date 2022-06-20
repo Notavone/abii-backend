@@ -10,7 +10,8 @@ export class CreateEanDto {
   value: string;
 
   @IsNumber()
-  @ApiProperty({
+  @IsOptional()
+  @ApiPropertyOptional({
     description: "",
     example: 1,
   })
@@ -24,4 +25,12 @@ export class CreateEanDto {
     example: 1,
   })
   quantity?: number;
+
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: "",
+    example: ""
+  })
+  comment?: string;
 }

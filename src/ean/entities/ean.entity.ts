@@ -38,6 +38,13 @@ export class Ean {
   })
   quantity: number;
 
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
+    description: "Comment about this ean",
+    example: "",
+  })
+  comment?: string;
+
   @CreateDateColumn()
   @ApiProperty({
     description: "Ean creation date",

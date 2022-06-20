@@ -1,27 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository } from "typeorm";
-import { ProductsService } from "../products/products.service";
+import { InjectConnection } from "@nestjs/typeorm";
+import { Connection } from "typeorm";
 import { Ean } from "./entities/ean.entity";
 import { CreateEanDto } from "./dto/create-ean.dto";
 import { UpdateEanDto } from "./dto/update-ean.dto";
+import { Product } from "../products/entities/product.entity";
 
 @Injectable()
 export class EanService {
 
   constructor(
-    @InjectRepository(Ean) private readonly eanRepository: Repository<Ean>,
     @InjectConnection() private readonly connection: Connection,
-    private readonly productsService: ProductsService,
   ) {
   }
 
   findAll() {
-    return this.eanRepository.find({ relations: ["product"] });
+    return this.connection.manager.find(Ean, { relations: ["product"] });
   }
 
   findOne(id: number) {
-    return this.eanRepository.findOneOrFail(id, { relations: ["product"] });
+    return this.connection.manager.findOneOrFail(Ean, id, { relations: ["product"] });
+  }
+
+  findOneByValue(value: string) {
+    return this.connection.manager.findOneOrFail(Ean, { value }, { relations: ["product"] });
   }
 
   async create(createEanDto: CreateEanDto) {
@@ -29,7 +31,7 @@ export class EanService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const product = await this.productsService.findOne(createEanDto.productId);
+      const product = await this.connection.manager.findOne(Product, { id: createEanDto.productId });
       let ean = queryRunner.manager.create(Ean, createEanDto);
       ean.product = product;
       ean = await queryRunner.manager.save(Ean, ean);
@@ -50,9 +52,7 @@ export class EanService {
     try {
       let ean = await this.findOne(id);
 
-      if (updateEanDto.productId) {
-        ean.product = await this.productsService.findOne(updateEanDto.productId);
-      }
+      ean.product = await queryRunner.manager.findOne(Product, { id: updateEanDto.productId }) ?? null;
       ean = await queryRunner.manager.save(Ean, queryRunner.manager.merge(Ean, ean, updateEanDto));
 
       await queryRunner.commitTransaction();
@@ -67,6 +67,6 @@ export class EanService {
 
   async delete(id: number) {
     let ean = await this.findOne(id);
-    return await this.eanRepository.remove(ean);
+    return await this.connection.manager.remove(Ean, ean);
   }
 }

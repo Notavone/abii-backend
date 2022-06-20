@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { JwtGuard } from "../auth/jwt/jwt.guard";
 import { PoliciesGuard } from "../auth/policies/policies.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
@@ -8,6 +8,7 @@ import { Ean } from "./entities/ean.entity";
 import { Permissions } from "../auth/policies/policies.decorator";
 import { CreateEanDto } from "./dto/create-ean.dto";
 import { UpdateEanDto } from "./dto/update-ean.dto";
+import { EanResolvable } from "./dto/ean-resolvable";
 
 @ApiBearerAuth()
 @ApiTags("users")
@@ -27,9 +28,10 @@ export class EanController {
   }
 
   @Permissions((ability) => ability.can(Action.READ, Ean))
-  @Get(":id")
-  findOne(@Param() id: number) {
-    return this.eanService.findOne(id);
+  @Get(":stringOrNumber")
+  findOne(@Param("stringOrNumber") stringOrNumber: string, @Query("mode") mode?: EanResolvable) {
+    if (!mode) return this.eanService.findOne(+stringOrNumber);
+    else if (mode === EanResolvable.VALUE) return this.eanService.findOneByValue(stringOrNumber);
   }
 
   @Permissions((ability => ability.can(Action.CREATE, Ean)))
@@ -40,13 +42,13 @@ export class EanController {
 
   @Permissions((ability) => ability.can(Action.UPDATE, Ean))
   @Patch(":id")
-  update(@Param() id: number, @Body() updateEanDto: UpdateEanDto) {
+  update(@Param("id") id: number, @Body() updateEanDto: UpdateEanDto) {
     return this.eanService.update(id, updateEanDto);
   }
 
   @Permissions((ability => ability.can(Action.DELETE, Ean)))
   @Delete(":id")
-  delete(@Param() id: number) {
+  delete(@Param("id") id: number) {
     return this.eanService.delete(id);
   }
 
