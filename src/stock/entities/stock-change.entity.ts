@@ -1,6 +1,6 @@
 import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, RelationId} from "typeorm";
 import {ApiProperty} from "@nestjs/swagger";
-import {Product} from "./product.entity";
+import {Product} from "../../products/entities/product.entity";
 import {User} from "../../users/entities/user.entity";
 import {Expose} from "class-transformer";
 

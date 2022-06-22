@@ -4,7 +4,7 @@ import {UpdateProductDto} from "./dto/update-product.dto";
 import {InjectConnection, InjectRepository} from "@nestjs/typeorm";
 import {Product} from "./entities/product.entity";
 import {Connection, QueryRunner, Repository} from "typeorm";
-import {StockChange} from "./entities/stock-change.entity";
+import {StockChange} from "../stock/entities/stock-change.entity";
 import {User} from "../users/entities/user.entity";
 import {UpdateProductBulkDto} from "./dto/update-product-bulk.dto";
 import {QueryProductDto} from "./dto/query-product.dto";

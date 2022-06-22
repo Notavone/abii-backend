@@ -15,6 +15,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { EanModule } from "./ean/ean.module";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { StockModule } from './stock/stock.module';
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { ThrottlerModule } from "@nestjs/throttler";
     ThrottlerModule.forRoot({
       limit: 20,
       ttl: 60
-    })
+    }),
+    StockModule
   ],
   controllers: [AppController],
   providers: [],

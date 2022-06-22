@@ -1,7 +1,7 @@
 import {Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
 import {ApiProperty} from "@nestjs/swagger";
 import {ProductType} from "../product-type";
-import {StockChange} from "./stock-change.entity";
+import {StockChange} from "../../stock/entities/stock-change.entity";
 import {Expose} from "class-transformer";
 
 @Entity()
