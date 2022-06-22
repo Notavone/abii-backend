@@ -5,7 +5,7 @@ import {InjectConnection, InjectRepository} from "@nestjs/typeorm";
 import {User} from "./entities/user.entity";
 import {Connection, MoreThanOrEqual, Repository} from "typeorm";
 import {Cron, CronExpression} from "@nestjs/schedule";
-import {MailService} from "../mail/mail.service";
+import {MailService} from "../../mail/mail.service";
 import {ConfirmUserDto} from "./dto/confirm-user.dto";
 import {InitUserPasswordResetDto} from "./dto/init-user-password-reset.dto";
 import {FinishUserPasswordResetDto} from "./dto/finish-user-password-reset.dto";

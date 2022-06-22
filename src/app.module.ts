@@ -5,17 +5,17 @@ import envDevLocal from "./environment/env.local";
 import envDev from "./environment/env.dev";
 import env from "./environment/env";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AuthModule } from "./auth/auth.module";
-import { UsersModule } from "./users/users.module";
-import { ClientsModule } from "./clients/clients.module";
-import { ProductsModule } from "./products/products.module";
-import { OrdersModule } from "./orders/orders.module";
+import { AuthModule } from "./api/auth/auth.module";
+import { UsersModule } from "./api/users/users.module";
+import { ClientsModule } from "./api/clients/clients.module";
+import { ProductsModule } from "./api/products/products.module";
+import { OrdersModule } from "./api/orders/orders.module";
 import { MailModule } from "./mail/mail.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
-import { EanModule } from "./ean/ean.module";
+import { EanModule } from "./api/ean/ean.module";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { StockModule } from './stock/stock.module';
+import { StockModule } from './api/stock/stock.module';
 
 @Module({
   imports: [

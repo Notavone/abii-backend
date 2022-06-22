@@ -6,7 +6,7 @@ import { compare } from "bcrypt";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { LoginResponseDto } from "./dto/login-response.dto";
-import { MailService } from "../mail/mail.service";
+import { MailService } from "../../mail/mail.service";
 
 @Injectable()
 export class AuthService {
