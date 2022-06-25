@@ -4,6 +4,10 @@ import { AuthService } from "./auth.service";
 import { LocalGuard } from "./local/local.guard";
 import { LoginDto } from "./dto/login.dto";
 import { LoginResponseDto } from "./dto/login-response.dto";
+import { JwtGuard } from "./jwt/jwt.guard";
+import { LoggedUser } from "./policies/user.decorator";
+import { User } from "../users/entities/user.entity";
+import { NotificationsService } from "../../notifications/notifications.service";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -11,6 +15,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private notificationsService: NotificationsService,
   ) {
   }
 
@@ -26,8 +31,10 @@ export class AuthController {
   }
 
   @Post("logout")
+  @UseGuards(JwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  logout(@Res({ passthrough: true }) res): void {
+  async logout(@Res({ passthrough: true }) res, @LoggedUser() user: User): Promise<void> {
+    await this.notificationsService.unsubscribe(user);
     res.clearCookie("access_token");
   }
 }

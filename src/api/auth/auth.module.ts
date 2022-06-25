@@ -12,6 +12,7 @@ import { JwtGuard } from "./jwt/jwt.guard";
 import { JwtStrategy } from "./jwt/jwt.strategy";
 import { PoliciesGuard } from "./policies/policies.guard";
 import { CaslAbilityFactory } from "./policies/casl-ability.factory";
+import { NotificationsModule } from "../../notifications/notifications.module";
 
 @Global()
 @Module({
@@ -25,6 +26,7 @@ import { CaslAbilityFactory } from "./policies/casl-ability.factory";
         signOptions: { expiresIn: configService.get("JWT_EXPIRES_IN") },
       }),
     }),
+    NotificationsModule,
   ],
   providers: [AuthService, LocalStrategy, LocalGuard, JwtStrategy, JwtGuard, CaslAbilityFactory, PoliciesGuard],
   controllers: [AuthController],

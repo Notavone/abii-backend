@@ -16,6 +16,7 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { EanModule } from "./api/ean/ean.module";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { StockModule } from './api/stock/stock.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { StockModule } from './api/stock/stock.module';
       limit: 20,
       ttl: 60
     }),
-    StockModule
+    StockModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [],

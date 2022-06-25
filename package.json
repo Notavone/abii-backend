@@ -36,6 +36,7 @@
     "class-validator": "^0.13.2",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
+    "firebase-admin": "^11.0.0",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.7.3",
     "passport": "^0.5.2",
