@@ -1,58 +1,63 @@
 import { Injectable } from "@nestjs/common";
-import * as admin from "firebase-admin";
-import { messaging } from "firebase-admin";
-import { DataMessagePayload, NotificationMessagePayload } from "firebase-admin/lib/messaging/messaging-api";
 import { User } from "../api/users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { NotificationToken } from "./entities/notification-token.entity";
-import { Repository } from "typeorm";
-import Messaging = messaging.Messaging;
+import { In, Repository } from "typeorm";
+import * as webPush from "web-push";
+import { PushSubscription } from "web-push";
 
 @Injectable()
 export class NotificationsService {
-  private readonly messaging: Messaging;
-
   constructor(
     private readonly config: ConfigService,
     @InjectRepository(NotificationToken) private readonly notificationTokenRepository: Repository<NotificationToken>,
   ) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: config.get("FIREBASE_PROJECT_ID"),
-        clientEmail: config.get("FIREBASE_CLIENT_MAIL"),
-        privateKey: config.get("FIREBASE_API_KEY").replace(/\\n/g, "\n"),
-      }),
-    });
-    this.messaging = admin.messaging();
+    webPush.setVapidDetails(`mailto:${this.config.get("MAIL_USERNAME")}`,
+      this.config.get("VAPID_PUBLIC_KEY"), this.config.get("VAPID_PRIVATE_KEY"));
   }
 
-  public async sendNotification(token: string, notification: NotificationMessagePayload, data?: DataMessagePayload) {
-    await this.messaging.send({
-      token,
-      notification,
-      data,
-    });
+  async sendNotification(tokens: NotificationToken[], notification: any, data: any) {
+    const payload = {
+      notification: {
+        ...notification,
+        vibrate: [100, 50, 100],
+        data,
+      },
+    };
+
+    return Promise.all(tokens
+      .map(((t) => webPush.sendNotification(t.pushSubscription as PushSubscription, JSON.stringify(payload)))));
   }
 
-  async subscribe(user: User, token: string) {
-    const existingToken = await this.notificationTokenRepository.findOne({ where: { token } });
+
+  async subscribe(user: User, subscription: PushSubscription) {
+    const existingToken = await this.notificationTokenRepository.findOne(user.pushNotificationSubscriptionId);
     if (existingToken) {
-      existingToken.user = user;
-      await this.notificationTokenRepository.save(existingToken);
-    } else {
-      await this.notificationTokenRepository.save({ user, token });
+      existingToken.active = true;
+      existingToken.pushSubscription = subscription;
+      return await this.notificationTokenRepository.save(existingToken);
     }
+    return await this.notificationTokenRepository.save({ user, pushSubscription: subscription });
   }
 
   async unsubscribe(user: User) {
-    await this.notificationTokenRepository.update({ user }, { user: null });
+    const existingToken = await this.notificationTokenRepository.findOne(user.pushNotificationSubscriptionId);
+    if (existingToken) {
+      existingToken.active = false;
+      return await this.notificationTokenRepository.save(existingToken);
+    }
   }
 
-  async getMostRecentToken(user: User) {
-    return await this.notificationTokenRepository.findOneOrFail({
-      where: { user },
-      order: { updatedAt: "DESC" },
-    });
+  sendNotificationToUser(user: User, notification: any, data?: any) {
+    return this.notificationTokenRepository.findOneOrFail({ id: user.pushNotificationSubscriptionId, active: true })
+      .then((tokens) => this.sendNotification([tokens], notification, data));
+  }
+
+  sendNotificationToUsers(users: User[], notification: any, data?: any) {
+    return this.notificationTokenRepository
+      .find({ where: { id: In(users.map(u => u.pushNotificationSubscriptionId)), active: true } })
+      .then((tokens) => this.sendNotification(tokens, notification, data));
   }
 }
+

@@ -1,19 +1,23 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
 import { User } from "../../api/users/entities/user.entity";
+import { PushSubscription } from "web-push";
 
 @Entity()
 export class NotificationToken {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
-  token: string;
+  @Column({ type: "simple-json" })
+  pushSubscription: PushSubscription;
 
   @RelationId((notificationToken: NotificationToken) => notificationToken.user)
   userId?: number;
 
-  @ManyToOne(() => User, (user) => user.notificationTokens, { nullable: true })
+  @OneToOne(() => User, (user) => user.pushNotificationSubscription, { nullable: true })
   user?: User;
+
+  @Column({ default: true })
+  active: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

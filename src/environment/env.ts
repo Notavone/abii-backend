@@ -15,8 +15,6 @@ export default () => ({
   MAIL_FROM: `"Lelah" <lelah.abbott86@ethereal.email>`,
   FRONT_URL: "912e011-01.iut-bm.univ-fcomte.fr",
   DB_LOGGING: false,
-
-  FIREBASE_CLIENT_MAIL: "",
-  FIREBASE_API_KEY: "",
-  FIREBASE_PROJECT_ID: "",
+  VAPID_PUBLIC_KEY: "",
+  VAPID_PRIVATE_KEY: "",
 });
