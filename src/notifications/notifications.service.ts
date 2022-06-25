@@ -17,10 +17,13 @@ export class NotificationsService {
       this.config.get("VAPID_PUBLIC_KEY"), this.config.get("VAPID_PRIVATE_KEY"));
   }
 
-  async sendNotification(tokens: NotificationToken[], notification: any, data: any) {
+  private async sendNotification(tokens: NotificationToken[], title: string, body: string, data: any) {
     const payload = {
       notification: {
-        ...notification,
+        title,
+        body,
+        silent: false,
+        timestamp: new Date().getTime(),
         vibrate: [100, 50, 100],
         data,
       },
@@ -35,6 +38,7 @@ export class NotificationsService {
     const existingToken = await this.notificationTokenRepository.findOne(user.pushNotificationSubscriptionId);
     if (existingToken) {
       existingToken.active = true;
+      existingToken.user = user;
       existingToken.pushSubscription = subscription;
       return await this.notificationTokenRepository.save(existingToken);
     }
@@ -49,15 +53,15 @@ export class NotificationsService {
     }
   }
 
-  sendNotificationToUser(user: User, notification: any, data?: any) {
+  sendNotificationToUser(user: User, title: string, body: string, data?: any) {
     return this.notificationTokenRepository.findOneOrFail({ id: user.pushNotificationSubscriptionId, active: true })
-      .then((tokens) => this.sendNotification([tokens], notification, data));
+      .then((tokens) => this.sendNotification([tokens], title, body, data));
   }
 
-  sendNotificationToUsers(users: User[], notification: any, data?: any) {
+  sendNotificationToUsers(users: User[], title: string, body: string, data?: any) {
     return this.notificationTokenRepository
       .find({ where: { id: In(users.map(u => u.pushNotificationSubscriptionId)), active: true } })
-      .then((tokens) => this.sendNotification(tokens, notification, data));
+      .then((tokens) => this.sendNotification(tokens, title, body, data));
   }
 }
 

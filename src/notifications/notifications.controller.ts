@@ -18,7 +18,6 @@ export class NotificationsController {
   }
 
   @Post("subscribe")
-  @HttpCode(HttpStatus.NO_CONTENT)
   public async subscribe(@LoggedUser() user: User, @Body() pushSubscription: PushSubscription) {
     return this.notificationsService.subscribe(user, pushSubscription);
   }
@@ -26,12 +25,7 @@ export class NotificationsController {
   @Get("test")
   @UseGuards(PoliciesGuard)
   @Permissions((ability) => ability.can(Action.MANAGE, User))
-  @HttpCode(HttpStatus.NO_CONTENT)
   public async test(@LoggedUser() user: User) {
-    await this.notificationsService.sendNotificationToUser(user, {
-      title: "Test",
-      body: "Test",
-    });
-    return;
+    return this.notificationsService.sendNotificationToUser(user, "Test", "Test", { test: "test" });
   }
 }
