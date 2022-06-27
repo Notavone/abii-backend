@@ -1,24 +1,23 @@
-import {Module} from '@nestjs/common';
-import {OrdersService} from './orders.service';
-import {OrdersController} from './orders.controller';
-import {TypeOrmModule} from "@nestjs/typeorm";
-import {Order} from "./entities/order.entity";
-import {OrderLine} from "./entities/order-line.entity";
-import {Client} from "../clients/entities/client.entity";
-import {Product} from "../products/entities/product.entity";
-import {UsersModule} from "../users/users.module";
-import {ProductsModule} from "../products/products.module";
-import {ClientsModule} from "../clients/clients.module";
+import { Module } from "@nestjs/common";
+import { OrdersService } from "./orders.service";
+import { OrdersController } from "./orders.controller";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Order } from "./entities/order.entity";
+import { UsersModule } from "../users/users.module";
+import { ProductsModule } from "../products/products.module";
+import { ClientsModule } from "../clients/clients.module";
+import { NotificationsModule } from "../../notifications/notifications.module";
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Order]),
-        ClientsModule,
-        UsersModule,
-        ProductsModule,
-    ],
-    controllers: [OrdersController],
-    providers: [OrdersService]
+  imports: [
+    TypeOrmModule.forFeature([Order]),
+    ClientsModule,
+    UsersModule,
+    ProductsModule,
+    NotificationsModule,
+  ],
+  controllers: [OrdersController],
+  providers: [OrdersService],
 })
 export class OrdersModule {
 }

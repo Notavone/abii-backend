@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { NotificationsService } from "./notifications.service";
 import { LoggedUser } from "../api/auth/policies/user.decorator";
 import { User } from "../api/users/entities/user.entity";
@@ -26,6 +26,10 @@ export class NotificationsController {
   @UseGuards(PoliciesGuard)
   @Permissions((ability) => ability.can(Action.MANAGE, User))
   public async test(@LoggedUser() user: User) {
-    return this.notificationsService.sendNotificationToUser(user, "Test", "Test", { test: "test" });
+    return this.notificationsService.sendNotificationTo(user, {
+      title: "Test",
+      body: "Test",
+      data: { test: "test" },
+    });
   }
 }
