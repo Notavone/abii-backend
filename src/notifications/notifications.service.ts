@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { User } from "../api/users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -9,6 +9,8 @@ import { PushSubscription } from "web-push";
 
 @Injectable()
 export class NotificationsService {
+  logger = new Logger(NotificationsService.name);
+
   constructor(
     private readonly config: ConfigService,
     @InjectRepository(NotificationToken) private readonly notificationTokenRepository: Repository<NotificationToken>,
@@ -28,9 +30,15 @@ export class NotificationsService {
         data,
       },
     };
+    this.logger.log(`Sending notification to ${tokens.length} tokens with payload: ${JSON.stringify(payload)}`);
 
-    return Promise.all(tokens
-      .map(((t) => webPush.sendNotification(t.pushSubscription as PushSubscription, JSON.stringify(payload)))));
+    const promises = tokens.map((token) => webPush.sendNotification(token.pushSubscription, JSON.stringify(payload)));
+    const notifications = await Promise.allSettled(promises);
+    const fulfilled = notifications.filter(n => n.status === "fulfilled").length;
+
+    this.logger.log(`Notification successfully sent to ${fulfilled} tokens`);
+
+    return notifications;
   }
 
 
