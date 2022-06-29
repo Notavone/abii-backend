@@ -3,10 +3,11 @@ import { User } from "../api/users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
 import { NotificationToken } from "./entities/notification-token.entity";
-import { Connection, In, Repository } from "typeorm";
+import { Connection, In, LessThanOrEqual, Repository } from "typeorm";
 import * as webPush from "web-push";
 import { PushSubscription } from "web-push";
 import { NotificationDto } from "./dto/notification.dto";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class NotificationsService {
@@ -45,7 +46,7 @@ export class NotificationsService {
 
 
   async subscribe(user: User, pushSubscription: PushSubscription) {
-    const existingToken = await this.notificationTokenRepository.findOne(user.pushNotificationSubscriptionId);
+    const existingToken = await this.notificationTokenRepository.findOne({ user: { id: user.id } });
     if (existingToken) {
       existingToken.active = true;
       existingToken.pushSubscription = pushSubscription;
@@ -62,7 +63,7 @@ export class NotificationsService {
   }
 
   async unsubscribe(user: User) {
-    const existingToken = await this.notificationTokenRepository.findOne(user.pushNotificationSubscriptionId);
+    const existingToken = await this.notificationTokenRepository.findOne({ user: { id: user.id } });
     if (existingToken) {
       existingToken.active = false;
       return await this.notificationTokenRepository.save(existingToken);
@@ -75,7 +76,7 @@ export class NotificationsService {
     if (!Array.isArray(usersResolvable)) usersResolvable = [usersResolvable];
 
     return this.notificationTokenRepository
-      .find({ where: { id: In(usersResolvable.map(u => u.pushNotificationSubscriptionId)), active: true } })
+      .find({ where: { user: { id: In(usersResolvable.map(u => u.id)) }, active: true } })
       .then((tokens) => this.sendNotification(tokens, notification));
   }
 
@@ -89,6 +90,21 @@ export class NotificationsService {
       if (conditionResult) this.sendNotificationTo(usersResolvable, notification);
       else this.logger.log("Conditions not met to emit notification");
     }, timeout);
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async setInactive() {
+    const inactiveTokens = this.notificationTokenRepository.find({
+      where: {
+        active: true,
+        updatedAt: LessThanOrEqual(new Date(Date.now() - 86400000)),
+      },
+    });
+
+    for (const inactiveToken of await inactiveTokens) {
+      inactiveToken.active = false;
+      await this.notificationTokenRepository.save(inactiveToken);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
 import { User } from "../../api/users/entities/user.entity";
 import { PushSubscription } from "web-push";
 
@@ -13,7 +13,8 @@ export class NotificationToken {
   @RelationId((notificationToken: NotificationToken) => notificationToken.user)
   userId?: number;
 
-  @OneToOne(() => User, (user) => user.pushNotificationSubscription, { nullable: true })
+  @OneToOne(() => User, (user) => user.pushNotificationSubscription, { nullable: true, cascade: true })
+  @JoinColumn()
   user?: User;
 
   @Column({ default: true })

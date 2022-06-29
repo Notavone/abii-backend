@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, Generated, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
+import { AfterLoad, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, Generated, JoinColumn, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn } from "typeorm";
 import { Exclude, Expose } from "class-transformer";
 import { Authority } from "../../auth/policies/authority";
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
@@ -94,14 +94,9 @@ export class User {
   @RelationId((user: User) => user.client)
   clientId?: number;
 
-  @OneToOne(() => NotificationToken, notificationToken => notificationToken.user)
-  @JoinColumn()
+  @OneToOne(() => NotificationToken, notificationToken => notificationToken.user, { onDelete: "SET NULL" })
   @ApiPropertyOptional({})
   pushNotificationSubscription?: NotificationToken;
-
-  @RelationId((user: User) => user.pushNotificationSubscription)
-  @ApiPropertyOptional({})
-  pushNotificationSubscriptionId?: number
 
   @CreateDateColumn()
   @ApiProperty({
