@@ -161,6 +161,15 @@ export class OrdersService {
       await queryRunner.manager.save(Order, order);
 
       await queryRunner.commitTransaction();
+
+      const user = await this.connection.manager.findOne(User, order.client.userId);
+      if (user) {
+        await this.notificationsService.sendNotificationTo(user, {
+          title: "Commande confirmée",
+          body: "Votre solde à été débité",
+        });
+      }
+
       return order;
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -171,6 +180,7 @@ export class OrdersService {
   }
 
   async refund(order: Order, seller: User) {
+    if (order.editable) throw new BadRequestException("Order is still editable");
     if (order.refunded) throw new BadRequestException("Order already refunded");
 
     const queryRunner = this.connection.createQueryRunner();
