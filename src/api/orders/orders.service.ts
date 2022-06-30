@@ -196,6 +196,15 @@ export class OrdersService {
       await queryRunner.manager.save(Order, order);
 
       await queryRunner.commitTransaction();
+
+      const user = await this.connection.manager.findOne(User, order.client.userId);
+      if (user) {
+        await this.notificationsService.sendNotificationTo(user, {
+          title: "Commande remboursée",
+          body: "Votre solde à été crédité",
+        });
+      }
+
       return order;
     } catch (e) {
       await queryRunner.rollbackTransaction();
