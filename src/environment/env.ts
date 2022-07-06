@@ -15,4 +15,6 @@ export default () => ({
   MAIL_FROM: `"Lelah" <lelah.abbott86@ethereal.email>`,
   FRONT_URL: "912e011-01.iut-bm.univ-fcomte.fr",
   DB_LOGGING: false,
+  VAPID_PUBLIC_KEY: "",
+  VAPID_PRIVATE_KEY: "",
 });
