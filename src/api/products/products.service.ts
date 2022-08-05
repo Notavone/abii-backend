@@ -8,11 +8,13 @@ import { StockChange } from "../stock/entities/stock-change.entity";
 import { User } from "../users/entities/user.entity";
 import { UpdateProductBulkDto } from "./dto/update-product-bulk.dto";
 import { QueryProductDto } from "./dto/query-product.dto";
+import { ProductCategory } from "./entities/product-category.entity";
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
+    @InjectRepository(ProductCategory) private readonly productCategoriesRepository: Repository<ProductCategory>,
     @InjectConnection() private readonly connection: Connection,
   ) {
   }
@@ -128,5 +130,9 @@ export class ProductsService {
     product.stock = newStock;
 
     return product;
+  }
+
+  findAllCategories(): Promise<ProductCategory[]> {
+    return this.productCategoriesRepository.find();
   }
 }

@@ -121,6 +121,11 @@ export class User {
     return `${this.firstName} ${this.lastName}`;
   }
 
+  @Expose()
+  get shortName(): string {
+    return `${this.firstName} ${this.lastName.charAt(0)}.`;
+  }
+
   @Exclude()
   @ApiHideProperty()
   private tempPassword: string;
