@@ -103,6 +103,8 @@ export class OrdersService {
         }
       }));
 
+      qb.orderBy("order.updatedAt", "DESC");
+
       return qb.getMany();
     } else return this.orderRepository.find();
   }
