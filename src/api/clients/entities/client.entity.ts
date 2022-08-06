@@ -1,6 +1,7 @@
 import {Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, RelationId, UpdateDateColumn} from "typeorm";
 import {ApiProperty, ApiPropertyOptional} from "@nestjs/swagger";
 import {User} from "../../users/entities/user.entity";
+import { Expose } from "class-transformer";
 
 @Entity()
 export class Client {
@@ -47,6 +48,11 @@ export class Client {
         nullable: true,
     })
     userId?: number;
+
+    @Expose()
+    get shortName(): string {
+        return this.name.split(" ")[0] + " " + this.name.split(" ")[1].charAt(0) + ".";
+    }
 
     @CreateDateColumn()
     @ApiProperty({
