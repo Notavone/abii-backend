@@ -116,7 +116,7 @@ export class ProductsService {
   }
 
   static async updateStock(queryRunner: QueryRunner, product: Product, newStock: number, user: User) {
-    if (product.stock === newStock || !product.useStock) return product;
+    if (product.stock === newStock || !product.useStock || newStock == null) return product;
 
     if (newStock < 0) throw new Error("Stock cannot be negative");
 
