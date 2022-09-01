@@ -1,23 +1,23 @@
-import {Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards} from "@nestjs/common";
-import {UsersService} from "./users.service";
-import {UpdateUserDto} from "./dto/update-user.dto";
-import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
-import {CreateUserDto} from "./dto/create-user.dto";
-import {JwtGuard} from "../auth/jwt/jwt.guard";
-import {User} from "./entities/user.entity";
-import {ConfirmUserDto} from "./dto/confirm-user.dto";
-import {Public} from "../auth/jwt/public.decorator";
-import {PoliciesGuard} from "../auth/policies/policies.guard";
-import {Permissions} from "../auth/policies/policies.decorator";
-import {Action} from "../auth/policies/action";
-import {AppAbility} from "../auth/policies/casl-ability.factory";
-import {UserAbility} from "../auth/policies/user-ability.decorator";
-import {InitUserPasswordResetDto} from "./dto/init-user-password-reset.dto";
+import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards } from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { JwtGuard } from "../auth/jwt/jwt.guard";
+import { User } from "./entities/user.entity";
+import { ConfirmUserDto } from "./dto/confirm-user.dto";
+import { Public } from "../auth/jwt/public.decorator";
+import { PoliciesGuard } from "../auth/policies/policies.guard";
+import { Permissions } from "../auth/policies/policies.decorator";
+import { Action } from "../auth/policies/action";
+import { AppAbility } from "../auth/policies/casl-ability.factory";
+import { UserAbility } from "../auth/policies/user-ability.decorator";
+import { InitUserPasswordResetDto } from "./dto/init-user-password-reset.dto";
 
 @ApiBearerAuth()
 @ApiTags("users")
 @UseGuards(JwtGuard, PoliciesGuard)
-@Controller("users")
+@Controller("api/users")
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -72,7 +72,7 @@ export class UsersController {
   @Patch(":id")
   async update(@Param("id") id: number, @Body() updateUserDto: UpdateUserDto, @UserAbility() ability: AppAbility) {
     const user = await this.usersService.findOne(id);
-    for(const key in updateUserDto) {
+    for (const key in updateUserDto) {
       if (!ability.can(Action.UPDATE, user, key)) throw new ForbiddenException();
     }
     return this.usersService.update(user, updateUserDto);

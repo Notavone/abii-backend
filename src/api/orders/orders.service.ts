@@ -10,7 +10,7 @@ import { Client } from "../clients/entities/client.entity";
 import { User } from "../users/entities/user.entity";
 import { Product } from "../products/entities/product.entity";
 import { ProductsService } from "../products/products.service";
-import { NotificationsService } from "../../notifications/notifications.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { UsersService } from "../users/users.service";
 
 @Injectable()

@@ -34,7 +34,7 @@ export class Client {
     })
     subscribedUntil?: Date;
 
-    @OneToOne(() => User, user => user.client, {nullable: true, cascade: ["update"]})
+    @OneToOne(() => User, user => user.client, {nullable: true, cascade: ["update"], onDelete: "SET NULL"})
     @JoinColumn()
     @ApiPropertyOptional({
         description: "The user associated with this client",

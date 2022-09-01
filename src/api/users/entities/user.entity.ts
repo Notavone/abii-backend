@@ -4,7 +4,7 @@ import { Authority } from "../../auth/policies/authority";
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { hash } from "bcrypt";
 import { Client } from "../../clients/entities/client.entity";
-import { NotificationToken } from "../../../notifications/entities/notification-token.entity";
+import { NotificationToken } from "../../notifications/entities/notification-token.entity";
 
 @Entity()
 export class User {

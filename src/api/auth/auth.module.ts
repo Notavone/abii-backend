@@ -12,13 +12,15 @@ import { JwtGuard } from "./jwt/jwt.guard";
 import { JwtStrategy } from "./jwt/jwt.strategy";
 import { PoliciesGuard } from "./policies/policies.guard";
 import { CaslAbilityFactory } from "./policies/casl-ability.factory";
-import { NotificationsModule } from "../../notifications/notifications.module";
+import { NotificationsModule } from "../notifications/notifications.module";
+import { MailModule } from "../../mail/mail.module";
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
