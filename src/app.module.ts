@@ -15,8 +15,8 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { EanModule } from "./api/ean/ean.module";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { StockModule } from './api/stock/stock.module';
-import { NotificationsModule } from './notifications/notifications.module';
+import { StockModule } from "./api/stock/stock.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -34,10 +34,14 @@ import { NotificationsModule } from './notifications/notifications.module';
         username: configService.get("DB_USERNAME"),
         password: configService.get("DB_PASSWORD"),
         database: configService.get("DB_DATABASE"),
+        logging: configService.get("DB_LOGGING"),
+        synchronize: configService.get("DB_SYNCHRONIZE"),
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
         subscribers: [__dirname + "/**/*.subscriber{.ts,.js}"],
-        synchronize: configService.get("DB_SYNCHRONIZE"),
-        logging: configService.get("DB_LOGGING"),
+        migrations: [__dirname + "/migrations/*{.ts,.js}"],
+        cli: {
+          migrationsDir: "src/migrations",
+        },
       }),
     }),
     AuthModule,
@@ -54,10 +58,10 @@ import { NotificationsModule } from './notifications/notifications.module';
     EanModule,
     ThrottlerModule.forRoot({
       limit: 20,
-      ttl: 60
+      ttl: 60,
     }),
     StockModule,
-    NotificationsModule
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [],

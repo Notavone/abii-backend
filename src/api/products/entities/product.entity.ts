@@ -58,6 +58,10 @@ export class Product {
   })
   image?: string;
 
+  @Column("float", { nullable: true, default: 0 })
+  @ApiProperty({})
+  buyPrice: number;
+
   @OneToMany(() => StockChange, (stockChange) => stockChange.product)
   stockChanges: StockChange[];
 
