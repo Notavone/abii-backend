@@ -11,9 +11,9 @@ import { UpdateEanDto } from "./dto/update-ean.dto";
 import { EanResolvable } from "./dto/ean-resolvable";
 
 @ApiBearerAuth()
-@ApiTags("users")
+@ApiTags("ean")
 @UseGuards(JwtGuard, PoliciesGuard)
-@Controller("ean")
+@Controller("api/ean")
 export class EanController {
 
   constructor(

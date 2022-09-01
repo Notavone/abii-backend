@@ -7,10 +7,10 @@ import { LoginResponseDto } from "./dto/login-response.dto";
 import { JwtGuard } from "./jwt/jwt.guard";
 import { LoggedUser } from "./policies/user.decorator";
 import { User } from "../users/entities/user.entity";
-import { NotificationsService } from "../../notifications/notifications.service";
+import { NotificationsService } from "../notifications/notifications.service";
 
 @ApiTags("auth")
-@Controller("auth")
+@Controller("api/auth")
 export class AuthController {
 
   constructor(

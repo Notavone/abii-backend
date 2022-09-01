@@ -6,7 +6,7 @@ import { Order } from "./entities/order.entity";
 import { UsersModule } from "../users/users.module";
 import { ProductsModule } from "../products/products.module";
 import { ClientsModule } from "../clients/clients.module";
-import { NotificationsModule } from "../../notifications/notifications.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [

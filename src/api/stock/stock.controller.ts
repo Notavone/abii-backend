@@ -11,7 +11,7 @@ import { QueryStockDto } from "./dto/query-stock.dto";
 @ApiBearerAuth()
 @ApiTags("stock")
 @UseGuards(JwtGuard, PoliciesGuard)
-@Controller("stock")
+@Controller("api/stock")
 export class StockController {
 
   constructor(

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { User } from "../api/users/entities/user.entity";
+import { User } from "../users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
 import { NotificationToken } from "./entities/notification-token.entity";

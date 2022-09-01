@@ -1,12 +1,9 @@
-import { NestFactory, Reflector } from "@nestjs/core";
+import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
-import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { name, version } from "../package.json";
 import * as cookieParser from "cookie-parser";
-import { EntityNotFoundFilter } from "./filters/entity-not-found.filter";
-import { QueryFailedErrorFilter } from "./filters/query-failed-error.filter";
 import { RequestInterceptor } from "./request.interceptor";
 import * as compression from "compression";
 
@@ -16,25 +13,9 @@ async function bootstrap() {
 
   app.enableCors();
   app.use(cookieParser(), compression());
-  app.setGlobalPrefix("api");
-
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-    forbidNonWhitelisted: true,
-    forbidUnknownValues: true,
-    skipUndefinedProperties: true,
-    skipNullProperties: false,
-  }));
 
   app.useGlobalInterceptors(
     new RequestInterceptor(),
-    new ClassSerializerInterceptor(app.get(Reflector)),
-  );
-
-  app.useGlobalFilters(
-    new EntityNotFoundFilter(),
-    new QueryFailedErrorFilter(),
   );
 
   const apiConfig = new DocumentBuilder()

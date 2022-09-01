@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { NotificationsService } from "./notifications.service";
-import { LoggedUser } from "../api/auth/policies/user.decorator";
-import { User } from "../api/users/entities/user.entity";
-import { JwtGuard } from "../api/auth/jwt/jwt.guard";
-import { PoliciesGuard } from "../api/auth/policies/policies.guard";
-import { Action } from "../api/auth/policies/action";
-import { Permissions } from "../api/auth/policies/policies.decorator";
+import { LoggedUser } from "../auth/policies/user.decorator";
+import { User } from "../users/entities/user.entity";
+import { JwtGuard } from "../auth/jwt/jwt.guard";
+import { PoliciesGuard } from "../auth/policies/policies.guard";
+import { Action } from "../auth/policies/action";
+import { Permissions } from "../auth/policies/policies.decorator";
 import { PushSubscription } from "web-push";
 
-@Controller("notifications")
+@Controller("api/notifications")
 @UseGuards(JwtGuard)
 export class NotificationsController {
 

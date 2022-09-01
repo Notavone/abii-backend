@@ -5,7 +5,6 @@ import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handleba
 import { ConfigService } from "@nestjs/config";
 import { join } from "path";
 
-@Global()
 @Module({
   imports: [MailerModule.forRootAsync({
     useFactory: (configService: ConfigService) => ({
