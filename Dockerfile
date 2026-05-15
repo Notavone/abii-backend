@@ -48,4 +48,4 @@ USER nestjs
 EXPOSE 3000
 
 # Lance l'app compilée
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
