@@ -4275,7 +4275,7 @@
   dependencies:
     "queue-microtask" "^1.2.2"
 
-"rxjs@^6.0.0 || ^7.2.0", "rxjs@^7.1.0", "rxjs@^7.2.0":
+"rxjs@^6.0.0 || ^7.2.0", "rxjs@^7.1.0", "rxjs@^7.2.0", "rxjs@^7.5.0":
   "integrity" "sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw=="
   "resolved" "https://registry.npmjs.org/rxjs/-/rxjs-7.5.5.tgz"
   "version" "7.5.5"
