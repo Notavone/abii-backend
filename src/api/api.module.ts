@@ -22,6 +22,7 @@ import { QueryFailedErrorFilter } from "../filters/query-failed-error.filter";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
       envFilePath: [".env.local", ".env.dev", ".env"],
       cache: true,
     }),
