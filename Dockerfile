@@ -1,37 +1,28 @@
 # ─────────────────────────────────────────────
-# Stage 1 — Dépendances
-# ─────────────────────────────────────────────
-FROM node:16-alpine AS deps
-
-WORKDIR /app
-
-# Copie des fichiers de lock pour un cache optimal
-COPY package.json yarn.lock ./
-
-# Installation des dépendances de production + dev (nécessaire pour le build)
-RUN yarn install --frozen-lockfile
-
-
-# ─────────────────────────────────────────────
-# Stage 2 — Build
+# Stage 1 — Build (Dépendances + Compilation)
 # ─────────────────────────────────────────────
 FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
+# Copie des fichiers de configuration
+COPY package.json yarn.lock ./
+
+# Installation de TOUTES les dépendances (prod + dev nécessaires pour builder)
+RUN yarn install --frozen-lockfile
+
+# Copie du reste du code source
 COPY . .
 
-# Build NestJS → génère dist/
+# Build NestJS (Génère le dossier dist/)
 RUN yarn build
 
-# Génération du client Prisma si tu migres vers Prisma
-# (à décommenter si le projet passe de TypeORM à Prisma)
-# RUN npx prisma generate
+# Nettoyage pour ne garder que les dépendances de production pour l'image finale
+RUN rm -rf node_modules && yarn install --frozen-lockfile --production
 
 
 # ─────────────────────────────────────────────
-# Stage 3 — Runtime (image minimale)
+# Stage 2 — Runtime (Image de production finale et légère)
 # ─────────────────────────────────────────────
 FROM node:16-alpine AS runner
 
@@ -39,20 +30,21 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Création d'un utilisateur non-root pour la sécurité
+# Sécurité : Création d'un utilisateur non-root
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nestjs
 
-# On copie uniquement ce qui est nécessaire à l'exécution
-COPY --from=builder /app/dist        ./dist
+# Récupération du build NestJS et des dépendances de production épurées
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
-# Si tu as des templates Handlebars (src/templates/) utilisés par @nestjs-modules/mailer
+# Copie optionnelle de vos templates de mail
 COPY --from=builder /app/src/mail/templates ./src/mail/templates
 
 USER nestjs
 
+# Attention : Assurez-vous que le port correspond bien à la variable BACKEND_PORT de votre stack Portainer !
 EXPOSE 3000
 
 # Lance l'app compilée
