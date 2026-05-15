@@ -16,16 +16,13 @@ import * as path from "path";
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
 import { EntityNotFoundFilter } from "../filters/entity-not-found.filter";
 import { QueryFailedErrorFilter } from "../filters/query-failed-error.filter";
-import env from "../environment/env";
-import envDev from "../environment/env.dev";
-import envDevLocal from "../environment/env.local";
 
 @Module({
 
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [env, envDev, envDevLocal],
+      envFilePath: [".env.local", ".env.dev", ".env"],
       cache: true,
     }),
     TypeOrmModule.forRootAsync({
