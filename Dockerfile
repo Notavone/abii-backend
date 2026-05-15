@@ -49,7 +49,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
 # Si tu as des templates Handlebars (src/templates/) utilisés par @nestjs-modules/mailer
-COPY --from=builder /app/src/templates ./src/templates
+COPY --from=builder /app/src/mail/templates ./src/mail/templates
 
 USER nestjs
 
