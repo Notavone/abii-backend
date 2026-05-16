@@ -59,7 +59,7 @@ export class ProductsService {
   }
 
   findOne(id: number) {
-    return this.productsRepository.findOneOrFail(id);
+    return this.productsRepository.findOneOrFail(id, { relations: ["categories"] });
   }
 
   async updateBulk(updateBulkDto: UpdateProductBulkDto, user: User) {
@@ -97,6 +97,13 @@ export class ProductsService {
       let product = await queryRunner.manager.findOneOrFail(Product, id);
 
       product = await ProductsService.updateStock(queryRunner, product, updateProductDto.stock, user);
+
+      if (updateProductDto.categories) {
+      product.categories = await queryRunner.manager.findByIds(
+        ProductCategory, 
+        updateProductDto.categories.map(c => c.id)
+      );
+    }
 
       product = queryRunner.manager.merge(Product, product, updateProductDto);
       await queryRunner.manager.save(product);

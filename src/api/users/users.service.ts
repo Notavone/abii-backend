@@ -29,7 +29,7 @@ export class UsersService {
     try {
       const user = queryRunner.manager.create(User, createUserDto);
       await queryRunner.manager.save(user);
-      await this.mailService.sendConfirmation(user);
+      //await this.mailService.sendConfirmation(user);
       await queryRunner.commitTransaction();
       return user;
     } catch (e) {
@@ -52,7 +52,7 @@ export class UsersService {
       let user = await manager.findOne(User, { where: { ...body } });
       manager.merge(User, user, { resetKey: v4() });
       user = await manager.save(user);
-      await this.mailService.sendInitUserPasswordReset(user);
+      //await this.mailService.sendInitUserPasswordReset(user);
       return user;
     });
   }
@@ -62,7 +62,7 @@ export class UsersService {
       let user = await manager.findOne(User, { where: { resetKey: body.resetKey } });
       manager.merge(User, user, { resetKey: null, password: body.password });
       user = await manager.save(user);
-      await this.mailService.sendFinishUserPasswordReset(user);
+      //await this.mailService.sendFinishUserPasswordReset(user);
       return user;
     });
   }
