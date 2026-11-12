@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { QueryStockDto } from "./dto/query-stock.dto";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { StockChange } from "./entities/stock-change.entity";
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 
 @Injectable()
 export class StockService {
@@ -10,8 +10,8 @@ export class StockService {
   constructor(
     @InjectRepository(StockChange)
     private readonly stockChangeRepository: Repository<StockChange>,
-    @InjectConnection()
-    private readonly connection: Connection,
+    @InjectDataSource()
+    private readonly connection: DataSource,
   ) {
   }
 

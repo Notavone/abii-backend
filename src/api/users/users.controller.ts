@@ -13,6 +13,8 @@ import { Action } from "../auth/policies/action";
 import { AppAbility } from "../auth/policies/casl-ability.factory";
 import { UserAbility } from "../auth/policies/user-ability.decorator";
 import { InitUserPasswordResetDto } from "./dto/init-user-password-reset.dto";
+import { FinishUserPasswordResetDto } from "./dto/finish-user-password-reset.dto";
+import { Throttle } from "@nestjs/throttler";
 
 @ApiBearerAuth()
 @ApiTags("users")
@@ -31,6 +33,7 @@ export class UsersController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post("confirm")
   @HttpCode(HttpStatus.OK)
   async confirm(@Body() body: ConfirmUserDto) {
@@ -38,6 +41,7 @@ export class UsersController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post("reset")
   async initReset(@Body() body: InitUserPasswordResetDto) {
     return this.usersService.initReset(body);
@@ -45,11 +49,13 @@ export class UsersController {
 
   @Public()
   @Put("reset")
-  async finishReset(@Body() body: any) {
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  async finishReset(@Body() body: FinishUserPasswordResetDto) {
     return this.usersService.finishReset(body);
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);

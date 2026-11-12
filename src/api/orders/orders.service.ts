@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
-import { Brackets, Connection, Repository } from "typeorm";
+import { Brackets, DataSource, Repository } from "typeorm";
 import { QueryOrderDto } from "./dto/query-order.dto";
 import { OrderLine } from "./entities/order-line.entity";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -16,7 +16,7 @@ import { UsersService } from "../users/users.service";
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
+    @InjectDataSource() private readonly connection: DataSource,
     @InjectRepository(Order) private readonly orderRepository: Repository<Order>,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
@@ -29,14 +29,14 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
-      const client = await queryRunner.manager.findOneOrFail(Client, createOrderDto.clientId);
+      const client = await queryRunner.manager.findOneOrFail(Client, { where: { id: createOrderDto.clientId } });
       let order = queryRunner.manager.create(Order, {
         client,
         orderLines: [],
       });
 
       for (const orderLine of createOrderDto.orderLines) {
-        const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
+        const product = await queryRunner.manager.findOneOrFail(Product, { where: { id: orderLine.productId } });
         let line = queryRunner.manager.create(OrderLine, {
           product,
           quantity: orderLine.quantity,
@@ -52,7 +52,7 @@ export class OrdersService {
         title: "Nouvelle commande",
         body: "Ouvrez l'application pour la confirmer",
       }, async () => {
-        const o = await this.orderRepository.findOneOrFail(order.id);
+        const o = await this.orderRepository.findOneOrFail({ where: { id: order.id } });
         return !o.refunded && o.editable;
       });
 
@@ -110,7 +110,7 @@ export class OrdersService {
   }
 
   findOne(id: number) {
-    return this.orderRepository.findOneOrFail(id, { relations: ["orderLines", "client", "orderLines.product"] });
+    return this.orderRepository.findOneOrFail({ where: { id: id }, ...{ relations: { orderLines: { product: true }, client: true } } });
   }
 
   async update(order: Order, updateOrderDto: UpdateOrderDto) {
@@ -123,7 +123,7 @@ export class OrdersService {
     try {
       order.orderLines = [];
       for (const orderLine of updateOrderDto.orderLines) {
-        const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
+        const product = await queryRunner.manager.findOneOrFail(Product, { where: { id: orderLine.productId } });
         let line = queryRunner.manager.create(OrderLine, {
           product,
           quantity: orderLine.quantity,
@@ -153,7 +153,7 @@ export class OrdersService {
 
     try {
       for (const orderLine of order.orderLines) {
-        const product = await queryRunner.manager.findOneOrFail(Product, orderLine.productId);
+        const product = await queryRunner.manager.findOneOrFail(Product, { where: { id: orderLine.productId } });
         orderLine.product = await ProductsService.updateStock(queryRunner, product, product.stock - orderLine.quantity, seller);
       }
 
@@ -164,7 +164,7 @@ export class OrdersService {
 
       await queryRunner.commitTransaction();
 
-      const user = await this.connection.manager.findOne(User, order.client.userId);
+      const user = await this.connection.manager.findOne(User, { where: { id: order.client.userId } });
       if (user) {
         await this.notificationsService.sendNotificationTo(user, {
           title: "Commande confirmée",
@@ -199,7 +199,7 @@ export class OrdersService {
 
       await queryRunner.commitTransaction();
 
-      const user = await this.connection.manager.findOne(User, order.client.userId);
+      const user = await this.connection.manager.findOne(User, { where: { id: order.client.userId } });
       if (user) {
         await this.notificationsService.sendNotificationTo(user, {
           title: "Commande remboursée",

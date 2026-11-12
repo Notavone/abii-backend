@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { Product } from "./entities/product.entity";
-import { Connection, QueryRunner, Repository } from "typeorm";
+import { DataSource, In, QueryRunner, Repository } from "typeorm";
 import { StockChange } from "../stock/entities/stock-change.entity";
 import { User } from "../users/entities/user.entity";
 import { UpdateProductBulkDto } from "./dto/update-product-bulk.dto";
@@ -15,7 +15,7 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product) private readonly productsRepository: Repository<Product>,
     @InjectRepository(ProductCategory) private readonly productCategoriesRepository: Repository<ProductCategory>,
-    @InjectConnection() private readonly connection: Connection,
+    @InjectDataSource() private readonly connection: DataSource,
   ) {
   }
 
@@ -59,7 +59,7 @@ export class ProductsService {
   }
 
   findOne(id: number) {
-    return this.productsRepository.findOneOrFail(id, { relations: ["categories"] });
+    return this.productsRepository.findOneOrFail({ where: { id: id }, ...{ relations: { categories: true } } });
   }
 
   async updateBulk(updateBulkDto: UpdateProductBulkDto, user: User) {
@@ -68,7 +68,7 @@ export class ProductsService {
     const updatedProducts = [];
     try {
       for (const product of updateBulkDto.products) {
-        let productToUpdate = await this.productsRepository.findOneOrFail(product.id);
+        let productToUpdate = await this.productsRepository.findOneOrFail({ where: { id: product.id } });
         productToUpdate = await ProductsService.updateStock(queryRunner, productToUpdate, product.stock, user);
 
         queryRunner.manager.merge(Product, productToUpdate, product);
@@ -94,18 +94,18 @@ export class ProductsService {
     await queryRunner.startTransaction();
 
     try {
-      let product = await queryRunner.manager.findOneOrFail(Product, id);
+      let product = await queryRunner.manager.findOneOrFail(Product, { where: { id: id } });
 
       product = await ProductsService.updateStock(queryRunner, product, updateProductDto.stock, user);
 
       if (updateProductDto.categories) {
-      product.categories = await queryRunner.manager.findByIds(
-        ProductCategory, 
-        updateProductDto.categories.map(c => c.id)
+      product.categories = await queryRunner.manager.findBy(
+        ProductCategory,
+        { id: In(updateProductDto.categories.map(c => c.id)) },
       );
     }
 
-      product = queryRunner.manager.merge(Product, product, updateProductDto);
+      product = queryRunner.manager.merge(Product, product, updateProductDto as any);
       await queryRunner.manager.save(product);
       await queryRunner.commitTransaction();
       return product;
@@ -118,7 +118,7 @@ export class ProductsService {
   }
 
   async remove(id: number) {
-    const product = await this.productsRepository.findOneOrFail(id);
+    const product = await this.productsRepository.findOneOrFail({ where: { id: id } });
     return this.productsRepository.remove(product);
   }
 

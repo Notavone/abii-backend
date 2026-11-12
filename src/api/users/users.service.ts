@@ -1,22 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
-import { Connection, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, MoreThanOrEqual, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { MailService } from "../../mail/mail.service";
 import { ConfirmUserDto } from "./dto/confirm-user.dto";
 import { InitUserPasswordResetDto } from "./dto/init-user-password-reset.dto";
 import { FinishUserPasswordResetDto } from "./dto/finish-user-password-reset.dto";
-import { v4 } from "uuid";
+import { randomUUID as v4 } from "crypto";
 import { Authority } from "../auth/policies/authority";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectConnection() private readonly connection: Connection,
+    @InjectDataSource() private readonly connection: DataSource,
     private readonly mailService: MailService,
   ) {
   }
@@ -41,25 +41,32 @@ export class UsersService {
 
   confirm(body: ConfirmUserDto) {
     return this.connection.transaction<User>(async (manager) => {
-      const user = await manager.findOne(User, { where: { ...body }, relations: ["client"] });
+      if (!body.activationKey) throw new BadRequestException();
+      const user = await manager.findOne(User, { where: { activationKey: body.activationKey }, relations: { client: true } });
+      if (!user) throw new BadRequestException();
       manager.merge(User, user, { activated: true });
       return manager.save(user);
     });
   }
 
-  initReset(body: InitUserPasswordResetDto) {
-    return this.connection.transaction<User>(async (manager) => {
-      let user = await manager.findOne(User, { where: { ...body } });
+  async initReset(body: InitUserPasswordResetDto) {
+    // Réponse identique que l'e-mail existe ou non (pas d'énumération de comptes)
+    await this.connection.transaction(async (manager) => {
+      if (!body.email) return;
+      let user = await manager.findOne(User, { where: { email: body.email } });
+      if (!user) return;
       manager.merge(User, user, { resetKey: v4() });
       user = await manager.save(user);
       //await this.mailService.sendInitUserPasswordReset(user);
-      return user;
     });
+    return {};
   }
 
   finishReset(body: FinishUserPasswordResetDto) {
     return this.connection.transaction<User>(async (manager) => {
+      if (!body.resetKey || !body.password) throw new BadRequestException();
       let user = await manager.findOne(User, { where: { resetKey: body.resetKey } });
+      if (!user) throw new BadRequestException();
       manager.merge(User, user, { resetKey: null, password: body.password });
       user = await manager.save(user);
       //await this.mailService.sendFinishUserPasswordReset(user);
@@ -68,11 +75,11 @@ export class UsersService {
   }
 
   findAll() {
-    return this.userRepository.find({ relations: ["client"] });
+    return this.userRepository.find({ relations: { client: true } });
   }
 
   findOne(id: number) {
-    return this.userRepository.findOneOrFail(id, { relations: ["client"] });
+    return this.userRepository.findOneOrFail({ where: { id: id }, ...{ relations: { client: true } } });
   }
 
   getSellers() {
@@ -85,7 +92,7 @@ export class UsersService {
   async update(user: User, updateUserDto: UpdateUserDto) {
     return this.connection.transaction<User>(async (manager) => {
       const merged = manager.merge(User, user, updateUserDto);
-      if (!updateUserDto.client) user.client = null;
+      if ("client" in updateUserDto && !updateUserDto.client) user.client = null;
       return manager.save(merged);
     });
   }
@@ -101,7 +108,7 @@ export class UsersService {
         activated: false,
         createdAt: MoreThanOrEqual(new Date(Date.now() - 7200000)),
       },
-      relations: ["client"],
+      relations: { client: true },
     })
       .then((users) => users.forEach((user) => this.userRepository.remove(user)));
   }

@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { User } from "../users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { NotificationToken } from "./entities/notification-token.entity";
-import { Connection, In, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import * as webPush from "web-push";
 import { PushSubscription, WebPushError } from "web-push";
 import { NotificationDto } from "./dto/notification.dto";
@@ -20,7 +20,7 @@ export class NotificationsService {
 
   constructor(
     private readonly config: ConfigService,
-    @InjectConnection() private readonly connection: Connection,
+    @InjectDataSource() private readonly connection: DataSource,
     @InjectRepository(NotificationToken) private readonly notificationTokenRepository: Repository<NotificationToken>,
   ) {
     webPush.setVapidDetails(`mailto:${this.config.get("MAIL_USERNAME")}`,
@@ -91,7 +91,7 @@ export class NotificationsService {
     }
 
     await this.connection.transaction(async (manager) => {
-      const tokens = await manager.find(NotificationToken, { relations: ["user"] });
+      const tokens = await manager.find(NotificationToken, { relations: { user: true } });
       const mine = tokens.find((t) => t.user?.id === user.id);
 
       // Même appareil enregistré pour un autre compte, ou abonnements orphelins (sans utilisateur) : supprimés

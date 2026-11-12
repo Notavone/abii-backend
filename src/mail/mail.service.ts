@@ -1,14 +1,34 @@
 import {Injectable} from "@nestjs/common";
-import {MailerService} from "@nestjs-modules/mailer";
+import { createTransport, Transporter } from "nodemailer";
+import * as Handlebars from "handlebars";
+import { readFileSync } from "fs";
+import { join } from "path";
 import {User} from "../api/users/entities/user.entity";
 import {ConfigService} from "@nestjs/config";
 
 @Injectable()
 export class MailService {
+    private readonly transporter: Transporter;
+
     constructor(
-        private readonly mailerService: MailerService,
         private readonly configService: ConfigService,
     ) {
+        this.transporter = createTransport({
+            host: configService.get("MAIL_HOST"),
+            port: +configService.get("MAIL_PORT"),
+            secure: false,
+            auth: {
+                user: configService.get("MAIL_USERNAME"),
+                pass: configService.get("MAIL_PASSWORD"),
+            },
+        });
+    }
+
+    private sendMail(options: { to: string; from?: string; subject: string; template: string; context: Record<string, unknown> }) {
+        const { template, context, ...rest } = options;
+        const source = readFileSync(join(__dirname, "templates", `${template}.hbs`), "utf-8");
+        const html = Handlebars.compile(source, { strict: true })(context);
+        return this.transporter.sendMail({ from: this.configService.get("MAIL_FROM"), ...rest, html });
     }
 
     private makeTo(initial: string) {
@@ -16,7 +36,7 @@ export class MailService {
     }
 
     sendConfirmation(user: User) {
-        return this.mailerService.sendMail({
+        return this.sendMail({
             to: this.makeTo(user.email),
             from: "abii.iutbelfort@gmail.com",
             subject: "Confirmation de création de compte",
@@ -29,7 +49,7 @@ export class MailService {
     }
 
     sendInitUserPasswordReset(user: User) {
-        return this.mailerService.sendMail({
+        return this.sendMail({
             to: this.makeTo(user.email),
             from: "abii.iutbelfort@gmail.com",
             subject: "Réinitialisation de mot de passe",
@@ -42,7 +62,7 @@ export class MailService {
     }
 
     sendFinishUserPasswordReset(user: User) {
-        return this.mailerService.sendMail({
+        return this.sendMail({
             to: this.makeTo(user.email),
             from: "abii.iutbelfort@gmail.com",
             subject: "Réinitialisation de mot de passe",

@@ -23,7 +23,7 @@ export class CaslAbilityFactory {
 
     if (user.authorities?.includes(Authority.USER_SELLER)) {
       can(Action.READ, User);
-      can(Action.UPDATE, User, ["username", "email", "firstName", "lastName", "client"]);
+      can(Action.UPDATE, User, ["username", "firstName", "lastName", "client"]);
 
       can(Action.READ, Order);
       can(Action.UPDATE, Order, ["refunded", "editable", "orderLines"]);
@@ -35,7 +35,7 @@ export class CaslAbilityFactory {
     }
 
     can(Action.READ, User, {id: user.id});
-    can(Action.UPDATE, User, {id: user.id});
+    can(Action.UPDATE, User, ["username", "email", "firstName", "lastName", "password"], {id: user.id});
 
     if (user.clientId) {
       can(Action.READ, Order, {clientId: user.clientId});
