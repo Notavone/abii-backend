@@ -8,12 +8,12 @@ import { ProductsModule } from "./products/products.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { EanModule } from "./ean/ean.module";
-import { ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { StockModule } from "./stock/stock.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { AppController } from "../app.controller";
 import * as path from "path";
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
 import { EntityNotFoundFilter } from "../filters/entity-not-found.filter";
 import { QueryFailedErrorFilter } from "../filters/query-failed-error.filter";
 
@@ -40,9 +40,6 @@ import { QueryFailedErrorFilter } from "../filters/query-failed-error.filter";
         entities: [path.join(__dirname, "..", "/**/*.entity{.ts,.js}")],
         subscribers: [path.join(__dirname, "..", "/**/*.subscriber{.ts,.js}")],
         migrations: [path.join(__dirname, "..", "/migrations/*{.ts,.js}")],
-        cli: {
-          migrationsDir: "src/migrations",
-        },
       }),
     }),
     AuthModule,
@@ -52,16 +49,17 @@ import { QueryFailedErrorFilter } from "../filters/query-failed-error.filter";
     OrdersModule,
     ScheduleModule.forRoot(),
     EanModule,
-    ThrottlerModule.forRoot({
-      limit: 20,
-      ttl: 60,
-    }),
+    ThrottlerModule.forRoot([{
+      limit: 200,
+      ttl: 60000,
+    }]),
     StockModule,
     NotificationsModule,
     ApiModule,
   ],
   controllers: [AppController],
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,

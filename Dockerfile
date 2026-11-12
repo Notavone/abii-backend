@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────
 # Stage 1 — Build (Dépendances + Compilation)
 # ─────────────────────────────────────────────
-FROM node:16-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ RUN rm -rf node_modules && yarn install --frozen-lockfile --production
 # ─────────────────────────────────────────────
 # Stage 2 — Runtime (Image de production finale et légère)
 # ─────────────────────────────────────────────
-FROM node:16-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 

@@ -1,23 +1,23 @@
 import {Injectable} from "@nestjs/common";
 import {CreateClientDto} from "./dto/create-client.dto";
 import {UpdateClientDto} from "./dto/update-client.dto";
-import {InjectConnection, InjectRepository} from "@nestjs/typeorm";
+import {InjectDataSource, InjectRepository} from "@nestjs/typeorm";
 import {Client} from "./entities/client.entity";
-import {Connection, Repository} from "typeorm";
+import {DataSource, IsNull, Repository} from "typeorm";
 
 @Injectable()
 export class ClientsService {
     constructor(
         @InjectRepository(Client) private readonly clientsRepository: Repository<Client>,
-        @InjectConnection() private readonly connection: Connection,
+        @InjectDataSource() private readonly connection: DataSource,
     ) {
     }
 
     findUnlinked() {
         return this.clientsRepository.find({
-            relations: ['user'],
+            relations: { user: true },
             where: {
-                user: null,
+                user: IsNull(),
             }
         });
     }
@@ -28,21 +28,21 @@ export class ClientsService {
     }
 
     findAll() {
-        return this.clientsRepository.find({relations: ['user']});
+        return this.clientsRepository.find({relations: { user: true }});
     }
 
     findOne(id: number) {
-        return this.clientsRepository.findOneOrFail(id, {relations: ["user"]});
+        return this.clientsRepository.findOneOrFail({ where: { id: id }, ...{relations: { user: true }} });
     }
 
     async update(id: number, updateClientDto: UpdateClientDto) {
-        let client = await this.clientsRepository.findOneOrFail(id, {relations: ["user"]});
+        let client = await this.clientsRepository.findOneOrFail({ where: { id: id }, ...{relations: { user: true }} });
         client = this.clientsRepository.merge(client, updateClientDto);
         return this.clientsRepository.save(client);
     }
 
     async remove(id: number) {
-        const client = await this.clientsRepository.findOneOrFail(id);
+        const client = await this.clientsRepository.findOneOrFail({ where: { id: id } });
         return this.clientsRepository.remove(client);
     }
 }

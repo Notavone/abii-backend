@@ -138,7 +138,6 @@ export class User {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
-    console.log(this.tempPassword);
     if (this.password !== this.tempPassword) {
       this.password = await hash(this.password, 10);
     }
