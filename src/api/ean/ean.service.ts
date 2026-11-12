@@ -31,7 +31,10 @@ export class EanService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const product = await this.connection.manager.findOne(Product, { where: { id: createEanDto.productId } });
+      // TypeORM 1.x lève une erreur sur une condition `undefined` : EAN sans produit -> pas de recherche
+      const product = createEanDto.productId != null
+        ? await this.connection.manager.findOne(Product, { where: { id: createEanDto.productId } })
+        : null;
       let ean = queryRunner.manager.create(Ean, createEanDto);
       ean.product = product;
       ean = await queryRunner.manager.save(Ean, ean);
@@ -52,7 +55,13 @@ export class EanService {
     try {
       let ean = await this.findOne(id);
 
-      ean.product = await queryRunner.manager.findOne(Product, { where: { id: updateEanDto.productId } }) ?? null;
+      // productId absent : produit inchangé ; null : EAN détaché ; sinon : produit correspondant
+      // (TypeORM 1.x lève une erreur sur une condition `undefined`)
+      if (updateEanDto.productId !== undefined) {
+        ean.product = updateEanDto.productId === null
+          ? null
+          : await queryRunner.manager.findOne(Product, { where: { id: updateEanDto.productId } }) ?? null;
+      }
       ean = await queryRunner.manager.save(Ean, queryRunner.manager.merge(Ean, ean, updateEanDto));
 
       await queryRunner.commitTransaction();
