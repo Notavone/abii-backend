@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
@@ -15,6 +15,8 @@ import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectDataSource() private readonly connection: DataSource,
     @InjectRepository(Order) private readonly orderRepository: Repository<Order>,
@@ -163,21 +165,31 @@ export class OrdersService {
       await queryRunner.manager.save(Order, order);
 
       await queryRunner.commitTransaction();
-
-      const user = await this.connection.manager.findOne(User, { where: { id: order.client.userId } });
-      if (user) {
-        await this.notificationsService.sendNotificationTo(user, {
-          title: "Commande confirmée",
-          body: "Votre solde à été débité",
-        });
-      }
-
-      return order;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
     } finally {
       await queryRunner.release();
+    }
+
+    // Hors transaction : la commande est validée quoi qu'il arrive à la notification
+    await this.notifyClient(order, { title: "Commande confirmée", body: "Votre solde à été débité" });
+    return order;
+  }
+
+  /**
+   * Notifie l'utilisateur lié au client de la commande, s'il y en a un. Ne lève jamais d'erreur :
+   * appelée après validation de la transaction, un échec ici ne doit pas faire croire à un échec de la commande
+   * (le client était débité alors que la caisse affichait une erreur -> risque de double débit).
+   */
+  private async notifyClient(order: Order, notification: { title: string; body: string }) {
+    const userId = order.client?.userId;
+    if (userId == null) return; // client sans compte ; TypeORM 1.x lève une erreur sur `where: { id: undefined }`
+    try {
+      const user = await this.connection.manager.findOne(User, { where: { id: userId } });
+      if (user) await this.notificationsService.sendNotificationTo(user, notification);
+    } catch (e) {
+      this.logger.warn(`Notification "${notification.title}" non envoyée pour la commande ${order.id}: ${e}`);
     }
   }
 
@@ -198,21 +210,14 @@ export class OrdersService {
       await queryRunner.manager.save(Order, order);
 
       await queryRunner.commitTransaction();
-
-      const user = await this.connection.manager.findOne(User, { where: { id: order.client.userId } });
-      if (user) {
-        await this.notificationsService.sendNotificationTo(user, {
-          title: "Commande remboursée",
-          body: "Votre solde à été crédité",
-        });
-      }
-
-      return order;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
     } finally {
       await queryRunner.release();
     }
+
+    await this.notifyClient(order, { title: "Commande remboursée", body: "Votre solde à été crédité" });
+    return order;
   }
 }
